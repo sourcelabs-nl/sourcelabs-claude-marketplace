@@ -1,0 +1,8 @@
+{
+  "name": "sourcelabs-claude-commands",
+  "description": "Contains commonly used commands for Claude Code.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Stephan Oudmaijer"
+  }
+}

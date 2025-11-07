@@ -1,0 +1,13 @@
+{
+  "name": "sourcelabs-claude-marketplace",
+  "owner": {
+    "name": "Sourcelabs B.V."
+  },
+  "plugins": [
+    {
+      "name": "sourcelabs-claude-commands",
+      "source": "./commands",
+      "description": "Contains commonly used commands for Claude Code."
+    }
+  ]
+}
