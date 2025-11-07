@@ -1,5 +1,5 @@
 {
-  "name": "sourcelabs-claude-commands",
+  "name": "claude-commands",
   "description": "Contains commonly used commands for Claude Code.",
   "version": "0.0.1",
   "author": {
