@@ -190,4 +190,4 @@ Sourcelabs B.V.
 
 ## License
 
-Copyright © 2024 Sourcelabs B.V.
+Copyright © 2025 Sourcelabs B.V.

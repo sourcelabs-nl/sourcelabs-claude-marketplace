@@ -142,7 +142,7 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ## License
 
-Copyright © 2024 Sourcelabs B.V.
+Copyright © 2025 Sourcelabs B.V.
 
 ## Author
 
