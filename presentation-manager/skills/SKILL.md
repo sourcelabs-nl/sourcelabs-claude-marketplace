@@ -36,7 +36,6 @@ description: Expert technical presentation designer and HTML-based presentation 
 - `slides/{presentation}.html` - Main wrapper with categorySlides object
 - `slides/{presentation}/{topic}/` - Topic folders with slide HTML files
 - `slides/assets/shared-styles.css` - Shared brand styles
-- `.claude/PRESENTATION-COMMANDS.md` - Complete documentation
 
 **Most Common Tasks**:
 1. "Create a new presentation about {topic}" → I'll design content + implement
@@ -61,7 +60,7 @@ The presentation system consists of:
 ```
 slides/
 ├── assets/
-│   ├── shared-styles.css          # Shared styles for all presentations
+│   ├── shared-styles.css          # Shared styles for all presentations (MUST: use ./assets/shared-styles.css!)
 ├── {presentation-name}/           # e.g., "coroutines", "interop-testing-framework-integration"
 │   ├── {topic-1}/                 # e.g., "agenda", "jobs-scopes-contexts"
 │   │   ├── title-page.html        # Topic introduction slide
@@ -333,7 +332,7 @@ fun example() {
 - The language class enables syntax highlighting
 - Keep proper indentation in code blocks for readability
 
-## Albert Heijn Brand Requirements
+## Brand Requirements
 
 ### Colors
 - **Primary Blue**: `#179EDA` (Battery Charged Blue)

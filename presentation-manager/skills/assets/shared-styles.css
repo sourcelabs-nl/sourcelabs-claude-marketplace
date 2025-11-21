@@ -1,5 +1,4 @@
-/* Shared Presentation Styles - Albert Heijn Brand Colors */
-
+/* Shared Presentation Styles - Brand Colors */
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +6,7 @@
 }
 
 body {
-    font-family: 'Verdana', Arial, serif;
+    font-family: 'Raleway', serif;
     background: linear-gradient(135deg, #179EDA 0%, #0C7BB8 100%);
     color: #333;
     overflow: hidden;
@@ -26,7 +25,7 @@ body {
 .slide {
     background: white;
     width: 95vw;
-    max-width: 1400px;
+    max-width: 95vw;
     height: calc(100vh - 150px);
     max-height: none;
     padding: 60px 60px;
@@ -39,6 +38,7 @@ body {
     position: relative;
 }
 
+/* AH Logo in bottom right corner */
 .slide::after {
     content: "";
     position: absolute;
@@ -46,6 +46,7 @@ body {
     right: 30px;
     width: 50px;
     height: 50px;
+    background-image: url('logo-ah.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -174,7 +175,7 @@ code[class*="language-"] {
 .controls {
     position: fixed;
     bottom: 30px;
-    right: calc((100vw - min(95vw, 1400px)) / 2);
+    right: calc((100vw - min(95vw)) / 2);
     display: flex;
     gap: 15px;
 }
@@ -204,7 +205,7 @@ button:disabled {
 .slide-number {
     position: fixed;
     bottom: 30px;
-    left: calc((100vw - min(95vw, 1400px)) / 2 );
+    left: calc((100vw - min(95vw)) / 2 );
     background: white;
     padding: 10px 20px;
     border-radius: 8px;
