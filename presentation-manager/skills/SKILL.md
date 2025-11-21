@@ -48,6 +48,24 @@ description: Expert technical presentation designer and HTML-based presentation 
 
 ---
 
+**CRITICAL: BEFORE generation any css files:**
+
+1. **Read** `templates/shared-styles.css` using the Read tool
+3. **Use that file as the LITERAL STARTING POINT** - not just inspiration
+4. **Keep all styles exactly as shown** - not just as a template
+
+**Avoid:**
+- ❌ Creating CSS from scratch
+- ❌ Inventing custom styling or color schemes
+- ❌ Using system fonts or dark themes
+
+**Follow these practices:**
+- ✅ Copy the template's exact CSS structure
+
+The CSS template is the foundation. Build on it, don't rebuild it.
+
+---
+
 ## Full Documentation
 
 You are a specialized skill for managing HTML-based technical presentations with the following structure.
@@ -60,7 +78,7 @@ The presentation system consists of:
 ```
 slides/
 ├── assets/
-│   ├── shared-styles.css          # Shared styles for all presentations (MUST: use ./assets/shared-styles.css!)
+│   ├── shared-styles.css          # Shared styles for all presentations (MUST: use assets/shared-styles.css)
 ├── {presentation-name}/           # e.g., "coroutines", "interop-testing-framework-integration"
 │   ├── {topic-1}/                 # e.g., "agenda", "jobs-scopes-contexts"
 │   │   ├── title-page.html        # Topic introduction slide
@@ -191,6 +209,8 @@ Key JavaScript variables:
 ## Individual Slide HTML Structure
 
 Each slide is a standalone HTML fragment (NOT a complete HTML document). Slides contain only the content, without `<html>`, `<head>`, or `<body>` tags.
+
+NEVER combine two slides (single responsibility principle), like a title slide and the agenda.
 
 ### Common Slide Patterns
 
