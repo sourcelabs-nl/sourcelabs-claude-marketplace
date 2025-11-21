@@ -8,6 +8,11 @@
       "name": "claude-commands",
       "source": "./commands",
       "description": "Contains commonly used commands for Claude Code."
+    },
+    {
+      "name": "presentation-manager",
+      "source": "./presentation-manager",
+      "description": "Presentation designer and HTML based presentation manager."
     }
   ]
 }

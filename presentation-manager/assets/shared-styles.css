@@ -1,0 +1,279 @@
+/* Shared Presentation Styles - Albert Heijn Brand Colors */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Verdana', Arial, serif;
+    background: linear-gradient(135deg, #179EDA 0%, #0C7BB8 100%);
+    color: #333;
+    overflow: hidden;
+}
+
+.presentation {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 30px;
+    padding-bottom: 110px;
+}
+
+.slide {
+    background: white;
+    width: 95vw;
+    max-width: 1400px;
+    height: calc(100vh - 150px);
+    max-height: none;
+    padding: 60px 60px;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    position: relative;
+}
+
+.slide::after {
+    content: "";
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+}
+
+/* Title slides (containing only centered h1) should be vertically centered */
+.slide:has(> .center > h1:first-child) {
+    justify-content: center;
+}
+
+.slide.active {
+    display: flex;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h1 {
+    font-size: 3em;
+    color: #179EDA;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 2.5em;
+    color: #179EDA;
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.8em;
+    color: #0C7BB8;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.subtitle {
+    font-size: 1.4em;
+    color: #666;
+    margin-top: 10px;
+}
+
+ul {
+    list-style: none;
+    margin: 20px 0;
+}
+
+ul li {
+    font-size: 1.3em;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    padding-left: 30px;
+    position: relative;
+}
+
+ul li:before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #179EDA;
+    font-weight: bold;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+code {
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #d63384;
+}
+
+pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+}
+
+/* Prism.js overrides for better integration */
+pre[class*="language-"] {
+    background: #2d2d2d;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 0.95em;
+}
+
+code[class*="language-"] {
+    background: none;
+    color: #f8f8f2;
+    text-shadow: none;
+    font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.controls {
+    position: fixed;
+    bottom: 30px;
+    right: calc((100vw - min(95vw, 1400px)) / 2);
+    display: flex;
+    gap: 15px;
+}
+
+button {
+    background: white;
+    border: 2px solid #179EDA;
+    color: #179EDA;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #179EDA;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slide-number {
+    position: fixed;
+    bottom: 30px;
+    left: calc((100vw - min(95vw, 1400px)) / 2 );
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #179EDA;
+    font-weight: 600;
+}
+
+.highlight {
+    background: #fff3cd;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.note {
+    background: #e7f3ff;
+    border-left: 4px solid #179EDA;
+    padding: 15px 20px;
+    margin: 20px 0;
+    font-size: 1.1em;
+    border-radius: 4px;
+}
+
+.center {
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1.1em;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #179EDA;
+    color: white;
+    font-weight: 600;
+}
+
+.comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.box {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+.box h4 {
+    color: #179EDA;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: white;
+}
