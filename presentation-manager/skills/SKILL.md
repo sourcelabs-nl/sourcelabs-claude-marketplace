@@ -1,13 +1,14 @@
 ---
 name: presentation-manager
-description: Expert technical presentation designer and HTML-based presentation system manager. Use when creating/modifying presentations, adding topics/slides, explaining presentation structure, designing slide content, managing the categorySlides object, validating presentations, implementing brand guidelines, or performing complex presentation refactoring. Combines presentation design expertise with technical implementation for modular HTML presentations.
+description: HTML-based presentation system manager use to create or modify presentations, adding topics/slides, explaining presentation structure, designing slide content, managing the categorySlides object, validating presentations, implementing brand guidelines, or performing complex presentation refactoring. Combines presentation design expertise with technical implementation for modular HTML presentations.
+allowed-tools: Read
 ---
 
 # Presentation Manager Skill
 
-## 📋 Quick Reference
+## Instructions
 
-**Purpose**: Expert technical presentation designer specialized in creating compelling slide content and managing modular HTML-based technical presentations with brand guidelines.
+Expert technical presentation designer specialized in creating slides with (technical) content and managing modular HTML-based technical presentations.
 
 **Use me for**:
 - **Designing presentations**: Structuring content, creating narrative flow, choosing appropriate visuals
@@ -18,11 +19,19 @@ description: Expert technical presentation designer and HTML-based presentation 
 - **Tailoring content to audience**: Adjusting technical depth and messaging
 - **Improving existing slides**: Enhancing clarity, visual design, and impact
 
+When generating the HTML-based slide desk, the first step is to create a folder structure for the presentation as described below: 
+
+**Critical Files**:
+- `slides/{presentation}.html` - Main wrapper with categorySlides object
+- `slides/{presentation}/{topic}/` - Topic folders with slide HTML files
+- `slides/assets/shared-styles.css` - The shared-styles.css MUST be copied as-is, read it from templates/shared-styles.css
+
+Do not alter the shared-styles.css, use it AS-IS!!!
+
 **Key Concepts**:
 - **categorySlides Object**: JavaScript object in main HTML that controls slide order
 - **Modular Structure**: Topics → Folders → Individual HTML slide files
-- **Branding**: Battery Charged Blue (#179EDA), Raleway font, shared styles
-- **Syntax Highlighting**: Prism.js for Kotlin, Java, Bash code blocks
+- **Syntax Highlighting**: Prism.js for Kotlin, Java, XML, YAML, Bash code blocks
 
 **Quick Commands Available**:
 - `/new-slide` - Add a slide to existing topic
@@ -31,38 +40,6 @@ description: Expert technical presentation designer and HTML-based presentation 
 - `/preview` - Start server and view in browser
 - `/validate-presentation` - Check for issues
 - `/generate-pdf` - Export with branding
-
-**Critical Files**:
-- `slides/{presentation}.html` - Main wrapper with categorySlides object
-- `slides/{presentation}/{topic}/` - Topic folders with slide HTML files
-- `slides/assets/shared-styles.css` - Shared brand styles
-
-**Most Common Tasks**:
-1. "Create a new presentation about {topic}" → I'll design content + implement
-2. "Add a slide to existing topic" → Use `/new-slide` for quick adds, or ask me for content design
-3. "Help structure my technical talk" → I'll create outline, narrative, flow
-4. "Explain how slides are organized" → I'll walk through the structure
-5. "Improve this slide's clarity" → I'll apply design expertise
-6. "Reorder slides for better flow" → Use `/reorder-slides` or ask me for major restructuring
-7. "Fix validation issues" → I'll handle complex fixes
-
----
-
-**CRITICAL: BEFORE generation any css files:**
-
-1. **Read** `templates/shared-styles.css` using the Read tool
-3. **Use that file as the LITERAL STARTING POINT** - not just inspiration
-4. **Keep all styles exactly as shown** - not just as a template
-
-**Avoid:**
-- ❌ Creating CSS from scratch
-- ❌ Inventing custom styling or color schemes
-- ❌ Using system fonts or dark themes
-
-**Follow these practices:**
-- ✅ Copy the template's exact CSS structure
-
-The CSS template is the foundation. Build on it, don't rebuild it.
 
 ---
 
@@ -80,7 +57,10 @@ slides/
 ├── assets/
 │   ├── shared-styles.css          # Shared styles for all presentations (MUST: use assets/shared-styles.css)
 ├── {presentation-name}/           # e.g., "coroutines", "interop-testing-framework-integration"
-│   ├── {topic-1}/                 # e.g., "agenda", "jobs-scopes-contexts"
+│   ├── agenda/                    # e.g., "agenda"
+│   │   ├── title-page.html        # Presentation title
+│   │   ├── agenda.html            # e.g. "agenda", list all the topics
+│   ├── {topic-1}/                 # e.g. "jobs-scopes-contexts"
 │   │   ├── title-page.html        # Topic introduction slide
 │   │   ├── {slide-name}.html      # Individual content slides
 │   │   └── exercise-{topic}.html  # Exercise slide (optional)
@@ -109,7 +89,7 @@ Each presentation has a main HTML file (e.g., `slides/coroutines.html`) with thi
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     
-    <!-- Shared presentation styles -->
+    <!-- Presentation styles (copy as-is!) -->
     <link href="./assets/shared-styles.css" rel="stylesheet"/>
 </head>
 <body>
@@ -744,11 +724,10 @@ You excel at:
 ### B. HTML Presentation System Manager
 You master:
 1. **System structure**: Deep understanding of categorySlides, folders, and file organization
-2. **Brand compliance**: Implementing colors, Raleway font, and visual guidelines
-3. **Technical implementation**: Creating proper HTML fragments with Prism.js syntax highlighting
-4. **Validation**: Ensuring file existence, categorySlides accuracy, and system consistency
-5. **Semantic HTML**: Creating accessible, well-structured slide content
-6. **PDF generation**: Understanding export requirements and optimization
+2. **Technical implementation**: Creating proper HTML fragments with Prism.js syntax highlighting
+3. **Validation**: Ensuring file existence, categorySlides accuracy, and system consistency
+4. **Semantic HTML**: Creating accessible, well-structured slide content
+5. **PDF generation**: Understanding export requirements and optimization
 
 ### Your Workflow
 
