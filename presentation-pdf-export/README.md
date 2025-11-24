@@ -66,9 +66,9 @@ The skill will automatically:
    - Verifies `scripts/generate-pdf.js` exists
    - Verifies `scripts/package.json` exists
    - Checks if presentation HTML file exists
-   - Validates `node_modules/` directory
+   - Validates `scripts/node_modules/` directory
 
-2. **Dependency Installation** (if needed):
+2. **Dependency Installation** (if needed, run in the folder the package.json is copied to):
    ```bash
    npm install
    ```
@@ -77,6 +77,13 @@ The skill will automatically:
    ```bash
    node scripts/generate-pdf.js {presentation}
    ```
+
+Or from inside the scripts folder:
+
+   ```bash
+   node generate-pdf.js {presentation}
+   ```
+
 
 4. **Output**:
    - Creates `{presentation}.pdf` in the current directory
