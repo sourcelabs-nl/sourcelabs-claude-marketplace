@@ -38,6 +38,24 @@ A comprehensive plugin for designing and managing HTML-based technical presentat
 
 [View plugin documentation →](./presentation-manager/README.md)
 
+### presentation-pdf-export
+
+A specialized plugin for generating professional PDF documents from HTML-based presentations created with the presentation-manager plugin. Uses Puppeteer and Chrome headless to create print-ready PDFs with full brand preservation.
+
+**Key Features:**
+- **Automated PDF Generation** - Convert HTML presentations to PDF with a single command
+- **Full Brand Preservation** - Maintains Raleway typography, Battery Charged Blue colors, and logo placement
+- **Syntax Highlighting** - Prism.js code highlighting preserved in PDF output
+- **Print Optimization** - Configurable slide dimensions (default 1200x800px)
+- **Dependency Management** - Automatic npm package installation and setup
+- **Error Recovery** - Comprehensive validation and troubleshooting guidance
+- **Dry-Run Mode** - Test PDF generation without creating files
+
+**Available Skill:**
+- **`presentation-pdf-export`** - AI-powered PDF export skill that handles prerequisites, dependency installation, validation, and PDF generation
+
+[View plugin documentation →](./presentation-pdf-export/README.md)
+
 ## Installation
 
 ### Prerequisites
@@ -61,6 +79,7 @@ A comprehensive plugin for designing and managing HTML-based technical presentat
    ```bash
    /plugin install claude-commands@sourcelabs
    /plugin install presentation-manager@sourcelabs
+   /plugin install presentation-pdf-export@sourcelabs
    ```
 
 3. Restart Claude Code to activate the plugin
@@ -85,6 +104,7 @@ Useful for development or when working with a local clone:
    ```bash
    /plugin install claude-commands@sourcelabs
    /plugin install presentation-manager@sourcelabs
+   /plugin install presentation-pdf-export@sourcelabs
    ```
 
 4. Restart Claude Code to activate the plugin
@@ -102,7 +122,8 @@ For automatic plugin installation across your team, add this configuration to yo
   ],
   "plugins": [
     "claude-commands@sourcelabs",
-    "presentation-manager@sourcelabs"
+    "presentation-manager@sourcelabs",
+    "presentation-pdf-export@sourcelabs"
   ]
 }
 ```
@@ -118,16 +139,19 @@ All plugins can be toggled on and off as needed to manage system prompt context.
 # Disable plugins temporarily
 /plugin disable claude-commands@sourcelabs
 /plugin disable presentation-manager@sourcelabs
+/plugin disable presentation-pdf-export@sourcelabs
 
 # Re-enable plugins
 /plugin enable claude-commands@sourcelabs
 /plugin enable presentation-manager@sourcelabs
+/plugin enable presentation-pdf-export@sourcelabs
 ```
 
 ### Uninstall
 ```bash
 /plugin uninstall claude-commands@sourcelabs
 /plugin uninstall presentation-manager@sourcelabs
+/plugin uninstall presentation-pdf-export@sourcelabs
 ```
 
 ### Interactive Management
@@ -147,22 +171,32 @@ Use the `/plugin` menu to browse, enable, disable, or uninstall plugins interact
 │   │   └── plugin.json            # Plugin metadata
 │   └── commands/
 │       └── cc.md                  # Conventional Commit command
-└── presentation-manager/          # presentation-manager plugin
+├── presentation-manager/          # presentation-manager plugin
+│   ├── README.md                  # Plugin documentation
+│   ├── .claude-plugin/
+│   │   └── plugin.json            # Plugin metadata
+│   ├── skills/
+│   │   └── SKILL.md               # Presentation Manager skill
+│   ├── commands/                  # Command definitions
+│   │   ├── new-slide.md
+│   │   ├── add-topic.md
+│   │   ├── list-slides.md
+│   │   ├── preview.md
+│   │   ├── validate-presentation.md
+│   │   └── reorder-slides.md
+│   └── assets/
+│       └── shared-styles.css      # Shared brand styles
+└── presentation-pdf-export/       # presentation-pdf-export plugin
     ├── README.md                  # Plugin documentation
     ├── .claude-plugin/
     │   └── plugin.json            # Plugin metadata
-    ├── skills/
-    │   └── SKILL.md               # Presentation Manager skill
-    ├── commands/                  # Command definitions
-    │   ├── new-slide.md
-    │   ├── add-topic.md
-    │   ├── list-slides.md
-    │   ├── preview.md
-    │   ├── validate-presentation.md
-    │   ├── generate-pdf.md
-    │   └── reorder-slides.md
-    └── assets/
-        └── shared-styles.css      # Shared brand styles
+    └── skills/
+        ├── SKILL.md               # PDF Export skill
+        ├── scripts/
+        │   └── generate-pdf.js    # PDF generation script
+        └── templates/
+            ├── package.json       # npm dependencies template
+            └── pdf-config.json    # Configuration template
 ```
 
 ## Development
@@ -198,11 +232,19 @@ For issues, questions, or feature requests, please open an issue in this reposit
 
 ## Version History
 
-### 0.0.2 (Current)
+### 0.0.3 (Current)
+- Added `presentation-pdf-export` plugin for generating professional PDFs from HTML presentations
+- Includes `presentation-pdf-export` skill for automated PDF generation with Puppeteer
+- Automatic dependency management and setup
+- Dry-run mode for testing PDF generation
+- Cross-platform support with automatic Chrome detection
+- Configurable slide dimensions and brand colors
+
+### 0.0.2
 - Added `presentation-manager` plugin with comprehensive HTML presentation design and management
-- Includes 7 commands for presentation management
+- Includes 6 commands for presentation management
 - Added `presentation-manager:skills` skill for expert presentation design
-- PDF export capability with Puppeteer integration
+- Removed PDF generation command from presentation-manager (moved to separate plugin)
 
 ### 0.0.1 (Initial Release)
 - Added `/cc` command for conventional commits
