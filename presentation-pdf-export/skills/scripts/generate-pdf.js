@@ -2,16 +2,89 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
-// Get presentation name from command line argument
-const presentationName = process.argv[2];
+// Platform-specific Chrome path detection
+function getChromePath() {
+    const platform = process.platform;
+
+    if (platform === 'darwin') {
+        // macOS
+        const macPaths = [
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            '/Applications/Chromium.app/Contents/MacOS/Chromium'
+        ];
+        for (const p of macPaths) {
+            if (fs.existsSync(p)) return p;
+        }
+    } else if (platform === 'win32') {
+        // Windows
+        const winPaths = [
+            'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+            'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe'
+        ];
+        for (const p of winPaths) {
+            if (fs.existsSync(p)) return p;
+        }
+    } else {
+        // Linux
+        const linuxPaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            '/snap/bin/chromium'
+        ];
+        for (const p of linuxPaths) {
+            if (fs.existsSync(p)) return p;
+        }
+    }
+
+    // Let Puppeteer find Chrome automatically
+    return undefined;
+}
+
+// Load optional configuration
+function loadConfig() {
+    const configPath = path.join(__dirname, 'pdf-config.json');
+    const defaultConfig = {
+        chromePath: getChromePath(),
+        brandPrimary: '#1089C8',
+        brandDark: '#0C7BB8',
+        slideWidth: '1200px',
+        slideHeight: '800px',
+        timeout: 5000
+    };
+
+    if (fs.existsSync(configPath)) {
+        try {
+            const userConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            console.log('📋 Loaded custom configuration from pdf-config.json\n');
+            return { ...defaultConfig, ...userConfig };
+        } catch (error) {
+            console.warn('⚠️  Warning: Could not parse pdf-config.json, using defaults');
+            return defaultConfig;
+        }
+    }
+
+    return defaultConfig;
+}
+
+const config = loadConfig();
+
+// Get presentation name and flags from command line arguments
+const args = process.argv.slice(2);
+const presentationName = args.find(arg => !arg.startsWith('--'));
+const isDryRun = args.includes('--dry-run');
 
 if (!presentationName) {
     console.error('❌ Error: Please specify a presentation name');
-    console.log('\nUsage: node generate-presentation-pdf.js <presentation-name>');
-    console.log('\nAvailable presentations:');
-    console.log('  - coroutines');
-    console.log('  - interop-testing-framework-integration');
+    console.log('\nUsage: node scripts/generate-pdf.js <presentation-name> [--dry-run]');
+    console.log('\nOptions:');
+    console.log('  --dry-run    Show what would be generated without creating PDF');
     process.exit(1);
+}
+
+if (isDryRun) {
+    console.log('🔍 DRY RUN MODE - No PDF will be generated\n');
 }
 
 const slidesBaseDir = path.join(__dirname, '..', 'slides');
@@ -19,12 +92,28 @@ const presentationDir = path.join(slidesBaseDir, presentationName);
 
 // Validate presentation directory exists
 if (!fs.existsSync(presentationDir)) {
-    console.error(`❌ Error: Presentation directory not found: ${presentationDir}`);
-    console.log('\nAvailable presentations:');
-    const dirs = fs.readdirSync(slidesBaseDir).filter(f =>
-        fs.statSync(path.join(slidesBaseDir, f)).isDirectory()
-    );
-    dirs.forEach(dir => console.log(`  - ${dir}`));
+    console.error(`❌ Error: Presentation directory not found`);
+    console.log(`\n📁 Expected: ${presentationDir}`);
+    console.log(`💡 Current working directory: ${process.cwd()}`);
+    console.log(`\n📂 Expected directory structure:`);
+    console.log(`   slides/`);
+    console.log(`     └── ${presentationName}/`);
+    console.log(`         └── [topic folders with HTML files]`);
+
+    if (fs.existsSync(slidesBaseDir)) {
+        console.log('\n📋 Available presentations:');
+        const dirs = fs.readdirSync(slidesBaseDir).filter(f =>
+            fs.statSync(path.join(slidesBaseDir, f)).isDirectory()
+        );
+        if (dirs.length > 0) {
+            dirs.forEach(dir => console.log(`  - ${dir}`));
+        } else {
+            console.log('  (no presentations found)');
+        }
+    } else {
+        console.log(`\n⚠️  Warning: slides/ directory not found at ${slidesBaseDir}`);
+        console.log('   Make sure you are in the correct workspace directory.');
+    }
     process.exit(1);
 }
 
@@ -33,7 +122,12 @@ console.log(`📄 Generating PDF for "${presentationName}" presentation...\n`);
 // Read the presentation HTML file to extract slide order
 const presentationHtmlPath = path.join(slidesBaseDir, `${presentationName}.html`);
 if (!fs.existsSync(presentationHtmlPath)) {
-    console.error(`❌ Error: Presentation HTML not found: ${presentationHtmlPath}`);
+    console.error(`❌ Error: Presentation HTML file not found`);
+    console.log(`\n📁 Expected: ${presentationHtmlPath}`);
+    console.log(`\n💡 Make sure the main presentation HTML file exists:`);
+    console.log(`   slides/${presentationName}.html`);
+    console.log(`\n   This file should contain the categorySlides object that defines`);
+    console.log(`   the order and structure of your presentation slides.`);
     process.exit(1);
 }
 
@@ -87,26 +181,17 @@ let printHTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${presentationName} - Print Version</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
-        /* Hamburg Font - AH Brand Typography */
-        @font-face {
-            font-family: 'Hamburg';
-            src: url('https://static.ah.nl/ah-static/fonts/hamburg-ah-regular.woff2') format('woff2'),
-                 url('https://static.ah.nl/ah-static/fonts/hamburg-ah-regular.woff2') format('woff');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: 'Hamburg';
-            src: url('https://static.ah.nl/ah-static/fonts/hamburg-ah-bold.woff2') format('woff2'),
-                 url('https://static.ah.nl/ah-static/fonts/hamburg-ah-bold.woff2') format('woff');
-            font-weight: 700;
-            font-style: normal;
-            font-display: swap;
-        }
-
+          
+        :root {
+       
+            /* Typography */
+            --font-base: 'Raleway', sans-serif;
+            --font-mono: 'Monaco', 'Courier New', monospace;
+            
         * {
             margin: 0;
             padding: 0;
@@ -114,14 +199,14 @@ let printHTML = `<!DOCTYPE html>
         }
 
         body {
-            font-family: 'Hamburg', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: var(--font-base);
             color: #333;
             background: white;
         }
 
         .slide {
-            width: 1200px;
-            height: 800px;
+            width: ${config.slideWidth};
+            height: ${config.slideHeight};
             padding: 60px;
             page-break-after: always;
             page-break-inside: avoid;
@@ -138,7 +223,7 @@ let printHTML = `<!DOCTYPE html>
             justify-content: center;
         }
 
-        /* AH Logo in bottom right corner */
+        /* Logo in bottom right corner */
         .slide::after {
             content: "";
             position: absolute;
@@ -146,7 +231,6 @@ let printHTML = `<!DOCTYPE html>
             right: 30px;
             width: 50px;
             height: 50px;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTIzLjIxOCAxMS40NzFsLTUuNTItMTAuMzA4YTIuMTcgMi4xNyAwIDAwLTIuOTc3LS44ODdMNC42MTggNS45MjRjLS40NTQuMjYtLjg3OS43MTYtMS4wNzIgMS4zNjJsLTIuNzExIDkuNDRjLS4zMjUgMS4xMy4zMSAyLjMxNCAxLjQyIDIuNjQ1bDE1LjkyNSA0LjU0MmMxLjEwOC4zMzIgMi4yNy0uMzE3IDIuNTk2LTEuNDQ3bDIuNjM0LTkuMjU3Yy4xNzEtLjU0NC4wNzUtMS4yMTQtLjE5Mi0xLjczOHoiIGZpbGw9IiMwMEFERTYiLz4KICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTMuMzc5IDYuMDM1cy0uMDA5IDQuMjktLjAwMSA0LjI4bC4yMDItLjI5Yy44NDEtMS4yMDcgMS42NTctMi4zMjEgMy4wOTItMi4zMjEgMS43MTYtLjAwMSAyLjY0NiAxLjQyNyAyLjY1MiAyLjYyOXYuNTMybC0uMDA4IDcuMTYzSDE3LjM5bC0uMDA5LTcuMjg0YzAtMS0uODA4LS45OTgtLjgyLS45OTgtLjY1IDAtMS44NSAxLjYyNC0zLjE4MyAzLjQyOXY0Ljg1NWwtMS45NDcuMDAyLS4wMDMtMi4yNDdzLTEuMjg4IDIuMjQ4LTMuMjE3IDIuMjVjLTIuMTg4IDAtMi45My0xLjQ5Ni0yLjkzNi01LjA4LS4wMDMtMy40MTUuNDg0LTUuMjQyIDIuODMtNS4yNDQgMS43ODMtLjAwMiAzLjMxNiAyLjU4MyAzLjMxNiAyLjU4M1Y4LjY1N2wxLjk1OC0yLjYyMnpNOC4xMzIgOS43NGMtLjg5Ni4wMDItLjk3NC45NDMtLjk3MSAzLjIxMi4wMDMgMi4yNy4xMjYgMy4xNTUuOTY5IDMuMTU1IDEuMTQ0LS4wMDIgMi45NDgtMi44OTcgMi45NDgtMi44OTdzLTEuNzktMy40Ny0yLjk0Ni0zLjQ3eiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -159,21 +243,21 @@ let printHTML = `<!DOCTYPE html>
 
         h1 {
             font-size: 3em;
-            color: #179EDA;
+            color: ${config.brandPrimary};
             margin-bottom: 20px;
             font-weight: 700;
         }
 
         h2 {
             font-size: 2.5em;
-            color: #179EDA;
+            color: ${config.brandPrimary};
             margin-bottom: 40px;
             font-weight: 600;
         }
 
         h3 {
             font-size: 1.8em;
-            color: #0C7BB8;
+            color: ${config.brandDark};
             margin-top: 10px;
             margin-bottom: 15px;
             font-weight: 600;
@@ -202,7 +286,7 @@ let printHTML = `<!DOCTYPE html>
             content: "▸";
             position: absolute;
             left: 0;
-            color: #179EDA;
+            color: ${config.brandPrimary};
             font-weight: bold;
         }
 
@@ -263,7 +347,7 @@ let printHTML = `<!DOCTYPE html>
 
         .note {
             background: #e7f3ff;
-            border-left: 4px solid #179EDA;
+            border-left: 4px solid ${config.brandPrimary};
             padding: 15px 20px;
             margin: 20px 0;
             font-size: 1.1em;
@@ -288,7 +372,7 @@ let printHTML = `<!DOCTYPE html>
         }
 
         th {
-            background: #179EDA;
+            background: ${config.brandPrimary};
             color: white;
             font-weight: 600;
         }
@@ -308,7 +392,7 @@ let printHTML = `<!DOCTYPE html>
         }
 
         .box h4 {
-            color: #179EDA;
+            color: ${config.brandPrimary};
             margin-bottom: 10px;
             font-size: 1.3em;
         }
@@ -325,7 +409,7 @@ let printHTML = `<!DOCTYPE html>
         }
 
         @page {
-            size: 1200px 800px;
+            size: ${config.slideWidth} ${config.slideHeight};
             margin: 0;
         }
     </style>
@@ -335,7 +419,11 @@ let printHTML = `<!DOCTYPE html>
 
 // Read and add each slide
 console.log('Adding slides in order:');
+console.log(`Progress: 0/${allSlides.length} slides processed\n`);
+
 let currentCategory = null;
+let processedCount = 0;
+
 allSlides.forEach((slide, index) => {
     // Print category header when it changes
     if (slide.category !== currentCategory) {
@@ -345,7 +433,11 @@ allSlides.forEach((slide, index) => {
 
     const slideContent = fs.readFileSync(slide.path, 'utf-8');
     printHTML += `    <div class="slide">\n        ${slideContent}\n    </div>\n\n`;
-    console.log(`  ✓ ${slide.file}`);
+    processedCount++;
+
+    // Show progress for every slide
+    const percentage = Math.round((processedCount / allSlides.length) * 100);
+    console.log(`  ✓ ${slide.file} [${processedCount}/${allSlides.length} - ${percentage}%]`);
 });
 
 printHTML += `
@@ -369,6 +461,27 @@ const printHtmlPath = path.join(__dirname, `${presentationName}-print.html`);
 fs.writeFileSync(printHtmlPath, printHTML);
 
 console.log(`\n✅ Generated print HTML: ${path.basename(printHtmlPath)}`);
+
+// If dry-run mode, show summary and exit
+if (isDryRun) {
+    console.log('\n📊 DRY RUN SUMMARY:');
+    console.log('═══════════════════════════════════════');
+    console.log(`Presentation:     ${presentationName}`);
+    console.log(`Total Slides:     ${allSlides.length}`);
+    console.log(`Total Categories: ${categories.length}`);
+    console.log(`Brand Primary:    ${config.brandPrimary}`);
+    console.log(`Brand Dark:       ${config.brandDark}`);
+    console.log(`Slide Size:       ${config.slideWidth} × ${config.slideHeight}`);
+    console.log(`Chrome Path:      ${config.chromePath || 'Auto-detect'}`);
+    console.log(`\nOutput would be:  ${path.join(__dirname, '..', `${presentationName}.pdf`)}`);
+    console.log(`Temp HTML file:   ${printHtmlPath}`);
+    console.log('\n✨ Dry run complete! Use without --dry-run to generate PDF.\n');
+
+    // Clean up temporary HTML file
+    fs.unlinkSync(printHtmlPath);
+    process.exit(0);
+}
+
 console.log('\n📝 Generating PDF...\n');
 
 // Generate PDF using Puppeteer
@@ -376,11 +489,21 @@ console.log('\n📝 Generating PDF...\n');
     try {
         console.log('🚀 Launching browser...');
 
-        const browser = await puppeteer.launch({
+        const launchOptions = {
             headless: true,
-            executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        };
+
+        // Use Chrome path from config, or try to detect it
+        const chromePath = config.chromePath || getChromePath();
+        if (chromePath) {
+            launchOptions.executablePath = chromePath;
+            console.log(`   Using Chrome: ${chromePath}`);
+        } else {
+            console.log('   Using Puppeteer bundled Chromium');
+        }
+
+        const browser = await puppeteer.launch(launchOptions);
 
         const page = await browser.newPage();
 
@@ -393,7 +516,7 @@ console.log('\n📝 Generating PDF...\n');
         console.log('🎨 Applying syntax highlighting...');
         await page.waitForFunction(() => {
             return typeof Prism !== 'undefined' && document.querySelectorAll('pre code').length > 0;
-        }, { timeout: 5000 }).catch(() => {
+        }, { timeout: config.timeout }).catch(() => {
             console.log('⚠️  Prism.js not found or no code blocks, continuing...');
         });
 
@@ -405,8 +528,8 @@ console.log('\n📝 Generating PDF...\n');
         console.log('💾 Saving PDF...');
         await page.pdf({
             path: pdfPath,
-            width: '1200px',
-            height: '800px',
+            width: config.slideWidth,
+            height: config.slideHeight,
             printBackground: true,
             preferCSSPageSize: true,
             margin: {

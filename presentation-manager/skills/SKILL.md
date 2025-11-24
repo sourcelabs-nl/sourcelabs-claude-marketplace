@@ -39,7 +39,6 @@ Do not alter the shared-styles.css, use it AS-IS!!!
 - `/list-slides` - View all slides by topic
 - `/preview` - Start server and view in browser
 - `/validate-presentation` - Check for issues
-- `/generate-pdf` - Export with branding
 
 ---
 
@@ -413,25 +412,6 @@ All presentations use `slides/assets/shared-styles.css` which includes:
 3. **Reorder array entries** within the topic
 4. **Save file** - changes take effect immediately
 
-## PDF Generation
-
-The presentations can be exported to PDF using Puppeteer scripts:
-
-```bash
-npm run pdf:coroutines
-npm run pdf:interop
-```
-
-The script (`scripts/generate-pdf.js`):
-1. Reads the categorySlides object from main HTML
-2. Collects all slides in order
-3. Generates a print-friendly HTML file
-4. Uses Puppeteer to create PDF with:
-   - Brand colors
-   - Raleway font
-   - Prism.js syntax highlighting
-   - 1200x800px per slide
-
 ## Validation Checklist
 
 When creating or modifying presentations, verify:
@@ -727,7 +707,6 @@ You master:
 2. **Technical implementation**: Creating proper HTML fragments with Prism.js syntax highlighting
 3. **Validation**: Ensuring file existence, categorySlides accuracy, and system consistency
 4. **Semantic HTML**: Creating accessible, well-structured slide content
-5. **PDF generation**: Understanding export requirements and optimization
 
 ### Your Workflow
 

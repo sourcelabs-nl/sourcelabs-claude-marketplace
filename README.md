@@ -17,6 +17,27 @@ A collection of commonly used commands for Claude Code that streamline developme
 
 [View plugin documentation →](./commands/README.md)
 
+### presentation-manager
+
+A comprehensive plugin for designing and managing HTML-based technical presentations with professional brand guidelines, modular structure, and PDF export capabilities.
+
+**Key Features:**
+- **Expert Presentation Design** - AI-powered content architecture, narrative flow, and visual hierarchy through the `presentation-manager:skills` skill
+- **Modular HTML System** - Topics organized in folders with individual slide files
+- **Brand Guidelines** - Built-in Raleway typography and Battery Charged Blue color scheme
+- **PDF Export** - Generate print-ready PDFs with full branding via Puppeteer
+- **Syntax Highlighting** - Prism.js integration for Kotlin, Java, Bash, and other languages
+
+**Available Commands:**
+- **`/presentation-manager:new-slide`** - Add a new slide to an existing topic
+- **`/presentation-manager:add-topic`** - Create a new topic with a title page
+- **`/presentation-manager:list-slides`** - View all slides organized by topic
+- **`/presentation-manager:preview`** - Start local server and preview presentation in browser
+- **`/presentation-manager:validate-presentation`** - Check for structural issues and missing files
+- **`/presentation-manager:reorder-slides`** - Reorder slides within or across topics
+
+[View plugin documentation →](./presentation-manager/README.md)
+
 ## Installation
 
 ### Prerequisites
@@ -39,6 +60,7 @@ A collection of commonly used commands for Claude Code that streamline developme
    Or install directly:
    ```bash
    /plugin install claude-commands@sourcelabs
+   /plugin install presentation-manager@sourcelabs
    ```
 
 3. Restart Claude Code to activate the plugin
@@ -59,9 +81,10 @@ Useful for development or when working with a local clone:
    /plugin marketplace add /path/to/sourcelabs-claude-marketplace
    ```
 
-3. Install the plugin:
+3. Install the plugins:
    ```bash
    /plugin install claude-commands@sourcelabs
+   /plugin install presentation-manager@sourcelabs
    ```
 
 4. Restart Claude Code to activate the plugin
@@ -78,7 +101,8 @@ For automatic plugin installation across your team, add this configuration to yo
     }
   ],
   "plugins": [
-    "claude-commands@sourcelabs"
+    "claude-commands@sourcelabs",
+    "presentation-manager@sourcelabs"
   ]
 }
 ```
@@ -91,16 +115,19 @@ All plugins can be toggled on and off as needed to manage system prompt context.
 
 ### Enable/Disable
 ```bash
-# Disable plugin temporarily
+# Disable plugins temporarily
 /plugin disable claude-commands@sourcelabs
+/plugin disable presentation-manager@sourcelabs
 
-# Re-enable plugin
+# Re-enable plugins
 /plugin enable claude-commands@sourcelabs
+/plugin enable presentation-manager@sourcelabs
 ```
 
 ### Uninstall
 ```bash
 /plugin uninstall claude-commands@sourcelabs
+/plugin uninstall presentation-manager@sourcelabs
 ```
 
 ### Interactive Management
@@ -114,12 +141,28 @@ Use the `/plugin` menu to browse, enable, disable, or uninstall plugins interact
 ├── README.md                      # This file
 ├── .claude-plugin/
 │   └── marketplace.json           # Marketplace metadata
-└── commands/                      # claude-commands plugin
+├── commands/                      # claude-commands plugin
+│   ├── README.md                  # Plugin documentation
+│   ├── .claude-plugin/
+│   │   └── plugin.json            # Plugin metadata
+│   └── commands/
+│       └── cc.md                  # Conventional Commit command
+└── presentation-manager/          # presentation-manager plugin
     ├── README.md                  # Plugin documentation
     ├── .claude-plugin/
     │   └── plugin.json            # Plugin metadata
-    └── commands/
-        └── cc.md                  # Conventional Commit command
+    ├── skills/
+    │   └── SKILL.md               # Presentation Manager skill
+    ├── commands/                  # Command definitions
+    │   ├── new-slide.md
+    │   ├── add-topic.md
+    │   ├── list-slides.md
+    │   ├── preview.md
+    │   ├── validate-presentation.md
+    │   ├── generate-pdf.md
+    │   └── reorder-slides.md
+    └── assets/
+        └── shared-styles.css      # Shared brand styles
 ```
 
 ## Development
@@ -154,6 +197,12 @@ Sourcelabs B.V.
 For issues, questions, or feature requests, please open an issue in this repository.
 
 ## Version History
+
+### 0.0.2 (Current)
+- Added `presentation-manager` plugin with comprehensive HTML presentation design and management
+- Includes 7 commands for presentation management
+- Added `presentation-manager:skills` skill for expert presentation design
+- PDF export capability with Puppeteer integration
 
 ### 0.0.1 (Initial Release)
 - Added `/cc` command for conventional commits

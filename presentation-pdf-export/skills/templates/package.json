@@ -1,0 +1,11 @@
+{
+  "name": "presentation-pdf-export",
+  "version": "1.0.0",
+  "description": "PDF Generator",
+  "scripts": {
+    "pdf": "node scripts/generate-pdf.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.5.0"
+  }
+}
