@@ -29,15 +29,15 @@ that serve as authoritative architectural references for senior java engineer.
 - **Include Diagrams**: true
 
 ## Instructions
-- During your analysis apply the Quality Standards from the @agents/templates/patterns/active-developer.md pattern
+- During your analysis apply the Quality Standards from the @agents/patterns/active-developer.md pattern
 
 ## Output Requirements
 
 ### CRITICAL: Template Adherence
-1. Read the template file: @agents/templates/layers/{{layer-name}}.md
+1. Read the template file: @agents/layers/{{layer-name}}.md
 2. The template defines the exact sections your final report must contain
 
 ### Content Depth
 - Provide thorough analysis within each template-defined section
-- Follow exactly the output format specifications from @agents/templates/output-formats/layer-medium-report.md
+- Follow exactly the output format specifications from @agents/output-formats/layer-medium-report.md
 

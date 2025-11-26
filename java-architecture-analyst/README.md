@@ -2,8 +2,8 @@
 
 # Java Architecture Analyst Agent
 
-[![Agent Type](https://img.shields.io/badge/🤖_Agent-Java_Architecture_Analyst-8b5cf6?style=for-the-badge&labelColor=4c1d95)](.)
-[![Model](https://img.shields.io/badge/🧠_Model-Claude_Sonnet-3b82f6?style=for-the-badge&labelColor=1e40af)](.)
+[![Agent Type](https://img.shields.io/badge/🤖_Agent-Java_Architecture_Analyst-8b5cf6?style=for-the-badge&labelColor=4c1d95)](agents)
+[![Model](https://img.shields.io/badge/🧠_Model-Claude_Sonnet-3b82f6?style=for-the-badge&labelColor=1e40af)](agents)
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue?style=flat-square)
 ![Layers](https://img.shields.io/badge/layers-18-informational?style=flat-square)
@@ -215,9 +215,9 @@ use java-architecture-analyst with variable layer-name=architectural-patterns,bu
 ## 📚 Additional Resources
 
 - **Agent Definition**: `.claude/agents/java-architecture-analyst.md`
-- **Layer Templates**: `.claude/agents/templates/layers/`
-- **Output Formats**: `.claude/agents/templates/output-formats/`
-- **Quality Patterns**: `.claude/agents/templates/patterns/`
+- **Layer Templates**: `.claude/agents/layers/`
+- **Output Formats**: `.claude/agents/output-formats/`
+- **Quality Patterns**: `.claude/agents/patterns/`
 
 ---
 

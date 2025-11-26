@@ -56,6 +56,21 @@ A specialized plugin for generating professional PDF documents from HTML-based p
 
 [View plugin documentation →](./presentation-pdf-export/README.md)
 
+### java-architecture-analyst
+
+An expert-level Java architecture analysis agent that produces structured, evidence-based architecture reports for Java/Spring Boot applications. Supports analysis across 18 specialized architectural layers.
+
+**Key Features:**
+- **18 Architectural Layers** - Comprehensive analysis from project overview to deployment operations
+- **Evidence-Based Reports** - Detailed documentation with code references and findings
+- **Multi-Layer Analysis** - Analyze multiple layers in a single command
+- **Specialized Templates** - Each layer focuses on specific architectural concerns
+
+**Available Agent:**
+- **`java-architecture-analyst`** - AI-powered architecture analysis agent with configurable layer selection
+
+[View plugin documentation →](./java-architecture-analyst/README.md)
+
 ## Installation
 
 ### Prerequisites
