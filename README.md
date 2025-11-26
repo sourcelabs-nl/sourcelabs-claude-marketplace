@@ -186,21 +186,51 @@ Use the `/plugin` menu to browse, enable, disable, or uninstall plugins interact
 │   │   └── plugin.json            # Plugin metadata
 │   └── commands/
 │       └── cc.md                  # Conventional Commit command
+├── java-architecture-analyst/     # java-architecture-analyst plugin
+│   ├── README.md                  # Plugin documentation
+│   ├── .claude-plugin/
+│   │   └── plugin.json            # Plugin metadata
+│   └── agents/
+│       ├── java-architecture-analyst.md  # Architecture analysis agent
+│       ├── layers/                # 18 analysis layer templates
+│       │   ├── project-overview.md
+│       │   ├── technology-stack.md
+│       │   ├── application-architecture.md
+│       │   ├── architectural-patterns.md
+│       │   ├── business-logic-architecture.md
+│       │   ├── data-architecture.md
+│       │   ├── requests-flow.md
+│       │   ├── security-architecture.md
+│       │   ├── configuration-management.md
+│       │   ├── cross-cutting-concerns.md
+│       │   ├── performance-scalability.md
+│       │   ├── testing.md
+│       │   ├── deployment-operations.md
+│       │   ├── cost-resource-optimization.md
+│       │   ├── key-design-decisions.md
+│       │   ├── recommendations.md
+│       │   ├── conclusions.md
+│       │   └── appendices.md
+│       ├── output-formats/
+│       │   └── layer-medium-report.md
+│       └── patterns/
+│           └── active-developer.md
 ├── presentation-manager/          # presentation-manager plugin
 │   ├── README.md                  # Plugin documentation
 │   ├── .claude-plugin/
 │   │   └── plugin.json            # Plugin metadata
 │   ├── skills/
-│   │   └── SKILL.md               # Presentation Manager skill
-│   ├── commands/                  # Command definitions
-│   │   ├── new-slide.md
-│   │   ├── add-topic.md
-│   │   ├── list-slides.md
-│   │   ├── preview.md
-│   │   ├── validate-presentation.md
-│   │   └── reorder-slides.md
-│   └── assets/
-│       └── shared-styles.css      # Shared brand styles
+│   │   ├── SKILL.md               # Presentation Manager skill
+│   │   ├── package.json           # npm dependencies
+│   │   └── templates/
+│   │       └── shared-styles.css  # Shared brand styles
+│   └── commands/                  # Command definitions
+│       ├── new-slide.md
+│       ├── add-topic.md
+│       ├── list-slides.md
+│       ├── preview.md
+│       ├── validate-presentation.md
+│       └── reorder-slides.md
 └── presentation-pdf-export/       # presentation-pdf-export plugin
     ├── README.md                  # Plugin documentation
     ├── .claude-plugin/
@@ -247,7 +277,13 @@ For issues, questions, or feature requests, please open an issue in this reposit
 
 ## Version History
 
-### 0.0.3 (Current)
+### 0.0.4 (Current)
+- Added `java-architecture-analyst` plugin for expert-level Java/Spring Boot architecture analysis
+- Includes `java-architecture-analyst` agent with 18 specialized architectural layers
+- Evidence-based reporting with code references and multi-layer analysis support
+- Specialized templates for each architectural layer from project overview to deployment operations
+
+### 0.0.3
 - Added `presentation-pdf-export` plugin for generating professional PDFs from HTML presentations
 - Includes `presentation-pdf-export` skill for automated PDF generation with Puppeteer
 - Automatic dependency management and setup
