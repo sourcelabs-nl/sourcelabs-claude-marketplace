@@ -84,7 +84,7 @@ This is an example of a Consumer Test for a REST API call using PactV4 and JUnit
             .willRespondWith()
                 .headers(Map.of("Content-Type", "application/json"))
                 .status(200)
-                .body( /* response body */ )
+                .body( /* graphql response body */ )
             .toPact(V4Pact.class); // Needed for PactV4.
     }
 ```
@@ -105,7 +105,12 @@ This is an example of a Consumer Test for a GraphQL call using PactV4 and JUnit 
             .willRespondWith()
                 .headers(Map.of("Content-Type", "application/json"))
                 .status(200)
-                .body( /* response body */ )
+                .body(
+                    new PactDslJsonBody()
+                        .uuid("id", UUID.randomUUID().toString())
+                        .stringType("field", "value")
+                        .localDate("date", "DD-MM-YYYY", LocalDate.now())
+                )
             .toPact(V4Pact.class); // Needed for PactV4.
     }
 ```
