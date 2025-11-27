@@ -1,0 +1,34 @@
+{
+  "name": "java-architecture-analyst",
+  "description": "Java Architecture Analyst that delivers targeted architecture reports",
+  "version": "0.0.1",
+  "author": {
+    "name": "Stefania Pozzi",
+    "email": "s.pozzi@sourcelabs.nl"
+  },
+  "keywords": [
+    "java",
+    "architecture",
+    "analysis",
+    "code-review",
+    "project-overview",
+    "application-architecture",
+    "architectural-patterns",
+    "business-logic-architecture",
+    "data-architecture",
+    "security-architecture",
+    "performance-scalability",
+    "testing",
+    "deployment-operations",
+    "configuration-management",
+    "cross-cutting-concerns",
+    "requests-flow",
+    "technology-stack",
+    "key-design-decisions",
+    "cost-resource-optimization",
+    "recommendations",
+    "conclusions",
+    "appendices"
+  ],
+  "agents": ["./agents/java-architecture-analyst.md"]
+}
