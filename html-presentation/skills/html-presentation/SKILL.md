@@ -1,10 +1,10 @@
 ---
-name: presentation-manager
-description: HTML-based presentation system manager use to create or modify presentations, adding topics/slides, explaining presentation structure, designing slide content, managing the categorySlides object, validating presentations, implementing brand guidelines, or performing complex presentation refactoring. Combines presentation design expertise with technical implementation for modular HTML presentations.
+name: html-presentation
+description: HTML-based presentation system use to create or modify presentations, adding topics/slides, explaining presentation structure, designing slide content, managing the categorySlides object, validating presentations, implementing brand guidelines, or performing complex presentation refactoring. Combines presentation design expertise with technical implementation for modular HTML presentations.
 allowed-tools: Read
 ---
 
-# Presentation Manager Skill
+# HTML-based presentation system skill
 
 ## Instructions
 

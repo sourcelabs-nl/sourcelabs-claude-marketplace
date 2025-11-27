@@ -1,0 +1,9 @@
+{
+  "name": "html-presentation",
+  "description": "HTML-based presentation system designed for structuring and building technical presentations. Includes PDF export functionality.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Stephan Oudmaijer"
+  },
+  "keywords": ["presentation", "html", "modular", "pdf", "export"]
+}

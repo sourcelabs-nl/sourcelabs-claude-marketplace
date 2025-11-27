@@ -1,0 +1,8 @@
+{
+  "name": "conventional-commits",
+  "description": "Plugin that provides support for create commit messages that follow the conventional commit specification.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Stephan Oudmaijer"
+  }
+}
