@@ -13,6 +13,11 @@
       "name": "html-presentation",
       "source": "./html-presentation",
       "description": "Presentation designer and HTML based presentation manager."
+    },
+    {
+      "name": "jvm-testing",
+      "source": "./jvm-testing",
+      "description": "Helps building and setting up tests for JVM based applications."
     }
   ]
 }

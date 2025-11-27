@@ -44,6 +44,20 @@ A comprehensive plugin for designing and managing HTML-based technical presentat
 
 [View plugin documentation →](./html-presentation/README.md)
 
+### jvm-testing
+
+A plugin that helps build and set up tests for JVM-based applications (Java/Kotlin).
+
+**Available Skills:**
+- **`pact-contract-test`** - Expert skill for writing Pact contract tests for HTTP (REST/GraphQL) and Message (async) interactions
+
+**Use cases:**
+- Creating HTTP-based contract tests (REST APIs, GraphQL)
+- Creating Message-based contract tests (Kafka)
+- Reviewing existing Pact tests for best practices
+
+[View plugin documentation →](./jvm-testing/README.md)
+
 ## Installation
 
 ### Prerequisites
@@ -67,6 +81,7 @@ A comprehensive plugin for designing and managing HTML-based technical presentat
    ```bash
    /plugin install conventional-commits@sourcelabs
    /plugin install html-presentation@sourcelabs
+   /plugin install jvm-testing@sourcelabs
    ```
 
 3. Restart Claude Code to activate the plugin
@@ -91,6 +106,7 @@ Useful for development or when working with a local clone:
    ```bash
    /plugin install conventional-commits@sourcelabs
    /plugin install html-presentation@sourcelabs
+   /plugin install jvm-testing@sourcelabs
    ```
 
 4. Restart Claude Code to activate the plugin
@@ -108,7 +124,8 @@ For automatic plugin installation across your team, add this configuration to yo
   ],
   "plugins": [
     "conventional-commits@sourcelabs",
-    "html-presentation@sourcelabs"
+    "html-presentation@sourcelabs",
+    "jvm-testing@sourcelabs"
   ]
 }
 ```
@@ -124,16 +141,19 @@ All plugins can be toggled on and off as needed to manage system prompt context.
 # Disable plugins temporarily
 /plugin disable conventional-commits@sourcelabs
 /plugin disable html-presentation@sourcelabs
+/plugin disable jvm-testing@sourcelabs
 
 # Re-enable plugins
 /plugin enable conventional-commits@sourcelabs
 /plugin enable html-presentation@sourcelabs
+/plugin enable jvm-testing@sourcelabs
 ```
 
 ### Uninstall
 ```bash
 /plugin uninstall conventional-commits@sourcelabs
 /plugin uninstall html-presentation@sourcelabs
+/plugin uninstall jvm-testing@sourcelabs
 ```
 
 ### Interactive Management
@@ -153,30 +173,37 @@ Use the `/plugin` menu to browse, enable, disable, or uninstall plugins interact
 │   │   └── plugin.json            # Plugin metadata
 │   └── commands/
 │       └── cc.md                  # Conventional Commit command
-└── html-presentation/             # html-presentation plugin
+├── html-presentation/             # html-presentation plugin
+│   ├── README.md                  # Plugin documentation
+│   ├── .claude-plugin/
+│   │   └── plugin.json            # Plugin metadata
+│   ├── skills/
+│   │   ├── html-presentation/     # Presentation Manager skill
+│   │   │   ├── SKILL.md
+│   │   │   ├── package.json
+│   │   │   └── templates/
+│   │   │       └── shared-styles.css
+│   │   └── html-presentation-pdf-export/  # PDF Export skill
+│   │       ├── SKILL.md
+│   │       ├── scripts/
+│   │       │   └── generate-pdf.js
+│   │       └── templates/
+│   │           ├── package.json
+│   │           └── pdf-config.json
+│   └── commands/                  # Command definitions
+│       ├── new-slide.md
+│       ├── add-topic.md
+│       ├── list-slides.md
+│       ├── preview.md
+│       ├── validate-presentation.md
+│       └── reorder-slides.md
+└── jvm-testing/                   # jvm-testing plugin
     ├── README.md                  # Plugin documentation
     ├── .claude-plugin/
     │   └── plugin.json            # Plugin metadata
-    ├── skills/
-    │   ├── html-presentation/     # Presentation Manager skill
-    │   │   ├── SKILL.md
-    │   │   ├── package.json
-    │   │   └── templates/
-    │   │       └── shared-styles.css
-    │   └── html-presentation-pdf-export/  # PDF Export skill
-    │       ├── SKILL.md
-    │       ├── scripts/
-    │       │   └── generate-pdf.js
-    │       └── templates/
-    │           ├── package.json
-    │           └── pdf-config.json
-    └── commands/                  # Command definitions
-        ├── new-slide.md
-        ├── add-topic.md
-        ├── list-slides.md
-        ├── preview.md
-        ├── validate-presentation.md
-        └── reorder-slides.md
+    └── skills/
+        └── pact-contract-test/    # Pact contract test skill
+            └── SKILL.md
 ```
 
 ## Development
@@ -212,7 +239,10 @@ For issues, questions, or feature requests, please open an issue in this reposit
 
 ## Version History
 
-### 0.0.5 (Current)
+### 0.0.6 (Current)
+- Added `jvm-testing` plugin with `pact-contract-test` skill for Pact contract testing
+
+### 0.0.5
 - Renamed `claude-commands` plugin to `conventional-commits` for clarity
 - Updated documentation to focus on the plugin's purpose
 
