@@ -496,19 +496,70 @@ class HttpProviderContractTest {
 }
 ```
 
-### Message Provider Test
+### Message Provider Test (Plain JUnit 5)
+
+For message-based interactions, the provider is the party that **produces/publishes messages** (e.g., to Kafka, RabbitMQ). This test verifies that your message producer generates messages matching the consumer's expectations.
 
 ```java
 import au.com.dius.pact.provider.MessageAndMetadata;
+import au.com.dius.pact.provider.PactVerifyProvider;
+import au.com.dius.pact.provider.junit5.MessageTestTarget;
+import au.com.dius.pact.provider.junit5.PactVerificationContext;
+import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Map;
+
+@Provider("{{PROVIDER_NAME}}")
+@PactFolder("pacts")
+class MessageProviderContractTest {
+
+    @TestTemplate
+    @ExtendWith(PactVerificationInvocationContextProvider.class)
+    void pactVerificationTestTemplate(PactVerificationContext context) {
+        context.verifyInteraction();
+    }
+
+    @BeforeEach
+    void before(PactVerificationContext context) {
+        context.setTarget(new MessageTestTarget());
+    }
+
+    @PactVerifyProvider("{{MESSAGE_DESCRIPTION}}")
+    MessageAndMetadata verifyMessageInteraction() {
+        // Call your actual message producer/builder here
+        var message = """
+            {
+              "id": "123",
+              "name": "value"
+            }
+            """;
+        Map<String, Object> metadata = Map.of("kafka-topic", "{{TOPIC_NAME}}");
+        return new MessageAndMetadata(message.getBytes(), metadata);
+    }
+}
+```
+
+### Message Provider Test (Spring Boot)
+
+Use this when your message producer depends on Spring beans:
+
+```java
+import au.com.dius.pact.provider.MessageAndMetadata;
+import au.com.dius.pact.provider.PactVerifyProvider;
 import au.com.dius.pact.provider.junit5.MessageTestTarget;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import au.com.dius.pact.provider.spring.junit5.PactVerificationSpring6Provider;
-import au.com.dius.pact.provider.PactVerifyProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
@@ -518,26 +569,25 @@ import java.util.Map;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class MessageProviderContractTest {
 
+    @Autowired
+    private MessageProducer messageProducer;  // Your Spring bean
+
     @TestTemplate
     @ExtendWith(PactVerificationSpring6Provider.class)
-    public void pactVerificationTestTemplate(PactVerificationContext context) {
+    void pactVerificationTestTemplate(PactVerificationContext context) {
         context.verifyInteraction();
     }
 
     @BeforeEach
-    public void before(PactVerificationContext context) {
+    void before(PactVerificationContext context) {
         context.setTarget(new MessageTestTarget());
     }
 
     @PactVerifyProvider("{{MESSAGE_DESCRIPTION}}")
-    public MessageAndMetadata verifyMessageInteraction() {
-        var message = """
-            {
-              "id": "123",
-              "name": "value"
-            }
-            """;
-        Map<String, String> metadata = Map.of("kafka-topic", "{{TOPIC_NAME}}");
+    MessageAndMetadata verifyMessageInteraction() {
+        // Use injected Spring bean to produce the message
+        var message = messageProducer.createMessage();
+        Map<String, Object> metadata = Map.of("kafka-topic", "{{TOPIC_NAME}}");
         return new MessageAndMetadata(message.getBytes(), metadata);
     }
 }
