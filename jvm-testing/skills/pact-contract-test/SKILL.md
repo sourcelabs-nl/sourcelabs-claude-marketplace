@@ -1,6 +1,6 @@
 ---
 name: pact-contract-test
-description: Pact contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
+description: Contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
 allowed-tools: Read, WebFetch
 ---
 
@@ -8,9 +8,10 @@ allowed-tools: Read, WebFetch
 
 ## Instructions
 
-Expert in writing and configuring Pact contract tests for JVM based languages like Java and Kotlin.
+Expert in writing and configuring contract test for JVM based languages like Java and Kotlin.
 
 **Use me for**:
+- **Creating contract tests**: For HTTP and Messaged based interactions using the JVM version of Pact. 
 - **Creating an HTTP based interaction contract test**: Request-response interactions over HTTP, typically synchronous flows.
 - **Creating a Message interaction contract test**: Message based interactions using Kafka, typically asynchronous flows.
 - **Review existing contract tests**: Provide suggestions and verify existing Pact contract tests, see if they follow best practices.
@@ -74,19 +75,19 @@ This is an example of a Consumer Test for a REST API call using PactV4 and JUnit
 
 ```java
 @Pact(provider="provider", consumer="consumer")
-    public V4Pact createPact(PactDslWithProvider builder) {
-        return builder
-            .given("state-description") // In what state do we expect the system to be when this interation occurs
-            .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
-                .path("/api")
-                .method("GET")
-                .headers(Map.of("Accept", "application/json"))
-            .willRespondWith()
-                .headers(Map.of("Content-Type", "application/json"))
-                .status(200)
-                .body( /* graphql response body */ )
-            .toPact(V4Pact.class); // Needed for PactV4.
-    }
+public V4Pact createPact(PactDslWithProvider builder) {
+    return builder
+        .given("state-description") // In what state do we expect the system to be when this interation occurs
+        .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
+            .path("/api")
+            .method("GET")
+            .headers(Map.of("Accept", "application/json"))
+        .willRespondWith()
+            .headers(Map.of("Content-Type", "application/json"))
+            .status(200)
+            .body( /* graphql response body */ )
+        .toPact(V4Pact.class); // Needed for PactV4.
+}
 ```
 
 ## Example: Pact HTTP (GraphQL) based interaction consumer test
@@ -95,24 +96,24 @@ This is an example of a Consumer Test for a GraphQL call using PactV4 and JUnit 
 
 ```java
 @Pact(provider="provider", consumer="consumer")
-    public V4Pact createPact(PactDslWithProvider builder) {
-        return builder
-            .given("state-description") // In what state do we expect the system to be when this interation occurs
-            .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
-                .path("/graphql")
-                .method("POST")
-                .headers(Map.of("Accept", "application/json"))
-            .willRespondWith()
-                .headers(Map.of("Content-Type", "application/json"))
-                .status(200)
-                .body(
-                    new PactDslJsonBody()
-                        .uuid("id", UUID.randomUUID().toString())
-                        .stringType("field", "value")
-                        .localDate("date", "DD-MM-YYYY", LocalDate.now())
-                )
-            .toPact(V4Pact.class); // Needed for PactV4.
-    }
+public V4Pact createPact(PactDslWithProvider builder) {
+    return builder
+        .given("state-description") // In what state do we expect the system to be when this interation occurs
+        .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
+            .path("/graphql")
+            .method("POST")
+            .headers(Map.of("Accept", "application/json"))
+        .willRespondWith()
+            .headers(Map.of("Content-Type", "application/json"))
+            .status(200)
+            .body(
+                new PactDslJsonBody()
+                    .uuid("id", UUID.randomUUID().toString())
+                    .stringType("field", "value")
+                    .localDate("date", "DD-MM-YYYY", LocalDate.now())
+            )
+        .toPact(V4Pact.class); // Needed for PactV4.
+}
 ```
 
 ## Example: Pact Message based interaction consumer test
@@ -213,7 +214,15 @@ class ProviderContractTest {
 }
 ```
 
-## Sharing Pact files via a shared library (without a broker)
+# Exchanging Pact Files
+After a consumer generates a new Pact file, it must be shared with providers for verification. Two main approaches:
+
+* Commit to provider repository – Create a PR with the changed interactions (manually or automated via the consumer build).
+* Provider fetches Pact files – Publish interactions to a third party (build server artifacts, S3, or Pact Broker) where providers download them before verification.
+
+Using the Pact Broker adds the benefit that providers can publish verification results, allowing both parties to query which versions are compatible and safe to deploy.
+
+## Sharing Pact files via a shared library jar (without a broker)
 
 When sharing Pact files in a jar, use the following maven configuration for packaging the pacts into a jar during the maven package phase: 
 
@@ -239,9 +248,9 @@ When sharing Pact files in a jar, use the following maven configuration for pack
 </plugin>
 ```
 
-## Pact workflow
+# Pact workflow
 
-### Key concepts
+## Key concepts
 
 | Concept | Description |
 |---------|-------------|
@@ -254,13 +263,13 @@ When sharing Pact files in a jar, use the following maven configuration for pack
 
 An application can be both consumer and provider depending on the interaction.
 
-### Consumer workflow
+## Consumer workflow
 
 1. Write consumer tests that specify the interactions you need
 2. Consumer tests generate the Pact file automatically
 3. Share the Pact file with the provider for verification
 
-### Provider workflow
+## Provider workflow
 
 1. Verify all existing contracts against your provider code
 2. If verification passes, your changes are compatible with all consumers
