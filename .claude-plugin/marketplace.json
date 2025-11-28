@@ -17,7 +17,7 @@
     {
       "name": "jvm-testing",
       "source": "./jvm-testing",
-      "description": "Helps building and setting up tests for JVM based applications."
+      "description": "Create and review tests for JVM based applications like contract tests."
     }
   ]
 }

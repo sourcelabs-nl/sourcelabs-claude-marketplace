@@ -1,9 +1,9 @@
 {
   "name": "jvm-testing",
   "description": "Helps building and setting up tests for JVM based applications.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Stephan Oudmaijer"
   },
-  "keywords" : ["kotlin", "java", "test", "mockk", "pact", "contract test", "spring boot test"]
+  "keywords" : ["kotlin", "java", "test", "mockk", "junit5", "pact", "contract", "contract test", "spring boot test"]
 }

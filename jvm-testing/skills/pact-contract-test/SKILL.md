@@ -1,6 +1,6 @@
 ---
 name: pact-contract-test
-description: Contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
+description: Pact contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
 allowed-tools: Read, WebFetch
 ---
 
@@ -8,35 +8,92 @@ allowed-tools: Read, WebFetch
 
 ## Instructions
 
-Expert in writing and configuring contract test for JVM based languages like Java and Kotlin.
-
-**Use me for**:
-- **Creating contract tests**: For HTTP and Messaged based interactions using the JVM version of Pact. 
-- **Creating an HTTP based interaction contract test**: Request-response interactions over HTTP, typically synchronous flows.
-- **Creating a Message interaction contract test**: Message based interactions using Kafka, typically asynchronous flows.
-- **Review existing contract tests**: Provide suggestions and verify existing Pact contract tests, see if they follow best practices.
-
 Before continuing, first ask for the following input:
 1. What is the interaction type: HTTP or Message based interaction?
-2. Provide an example interaction: request/response for HTTP or a message for Message (asynchronous) interactions.
+2. Is this a Consumer test or Provider verification test?
+3. Provide an example interaction: request/response for HTTP or a message for Message (asynchronous) interactions.
 
-# Pact Maven dependencies
+## Decision Flow
 
-The following Pact dependencies are commonly used for Pact V5. Where ${pact.version} is a variable for the pact version (e.g. 4.6.17).
+```
+1. HTTP vs Message?
+   ├─ HTTP: REST APIs, GraphQL, synchronous request-response
+   └─ Message: Kafka, RabbitMQ, async events, pub/sub
+
+2. Consumer vs Provider?
+   ├─ Consumer: Your app CALLS another service (you define expectations)
+   └─ Provider: Your app IS CALLED by others (you verify expectations)
+
+3. Framework?
+   ├─ Spring Boot 3.x → use spring6 artifact
+   ├─ Spring Boot 2.x → use junit5spring artifact
+   └─ Plain JUnit 5 → use core artifacts only
+```
+
+## Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Consumer** | Application that uses functionality from another component (e.g., makes HTTP requests) |
+| **Provider** | Application that offers functionality to others (e.g., exposes an HTTP API) |
+| **Interaction** | Defines what is consumed and how: request, provider state, and expected response |
+| **Provider state** | Test fixture describing the provider's state during an interaction |
+| **Contract (Pact file)** | Contains all interactions between a specific consumer and provider |
+| **Verification** | Replays interactions against provider code and compares actual vs expected responses |
+
+An application can be both consumer and provider depending on the interaction.
+
+## Quick Start Template (HTTP Consumer)
+
+Minimal copy-paste ready template:
+
+```java
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit5.PactConsumerTest;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
+import au.com.dius.pact.core.model.PactSpecVersion;
+import au.com.dius.pact.core.model.V4Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
+import org.junit.jupiter.api.Test;
+import java.util.Map;
+
+@PactConsumerTest
+@PactTestFor(providerName = "{{PROVIDER_NAME}}", pactVersion = PactSpecVersion.V4)
+class {{CONSUMER_NAME}}ContractTest {
+
+    @Pact(provider = "{{PROVIDER_NAME}}", consumer = "{{CONSUMER_NAME}}")
+    public V4Pact createPact(PactDslWithProvider builder) {
+        return builder
+            .given("{{PROVIDER_STATE}}")
+            .uponReceiving("{{INTERACTION_DESCRIPTION}}")
+                .path("{{PATH}}")
+                .method("GET")
+                .headers(Map.of("Accept", "application/json"))
+            .willRespondWith()
+                .headers(Map.of("Content-Type", "application/json"))
+                .status(200)
+                .body(new PactDslJsonBody()
+                    .stringType("field", "example"))
+            .toPact(V4Pact.class);
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "createPact")
+    void test(MockServer mockServer) {
+        // Use mockServer.getUrl() + path to call the mock
+    }
+}
+```
+
+## Maven Dependencies
+
+Where `${pact.version}` is a variable for the pact version (e.g. 4.6.17).
+
+### Core Dependencies (Required)
 
 ```xml
-<dependency>
-    <groupId>au.com.dius.pact</groupId>
-    <artifactId>provider</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>au.com.dius.pact</groupId>
-    <artifactId>consumer</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
 <dependency>
     <groupId>au.com.dius.pact.consumer</groupId>
     <artifactId>junit5</artifactId>
@@ -45,80 +102,123 @@ The following Pact dependencies are commonly used for Pact V5. Where ${pact.vers
 </dependency>
 ```
 
-Pact Spring specific dependencies (JUnit 5):
+### Provider Verification (Add based on framework)
 
 ```xml
-<dependency>
-    <groupId>au.com.dius.pact.provider</groupId>
-    <artifactId>junit5spring</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
-```
-
-Pact Spring Boot dependencies:
-
-```xml
+<!-- Spring Boot 3.x (Spring 6) -->
 <dependency>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>spring6</artifactId>
     <version>${pact.version}</version>
     <scope>test</scope>
 </dependency>
+
+<!-- Spring Boot 2.x -->
+<dependency>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>junit5spring</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- Plain JUnit 5 (no Spring) -->
+<dependency>
+    <groupId>au.com.dius.pact</groupId>
+    <artifactId>provider</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
 ```
 
-# Pact Consumer Test examples
+## Consumer Tests
 
-## Example: Pact HTTP (REST API) based interaction consumer test
+### JUnit 5 Annotations
 
-This is an example of a Consumer Test for a REST API call using PactV4 and JUnit 5.
+| Annotation | Purpose |
+|------------|---------|
+| `@PactConsumerTest` | Marks class as a Pact consumer test |
+| `@Pact` | Defines a pact method that returns V4Pact |
+| `@PactTestFor` | Links test to specific pact method, configures mock server |
+| `@PactDirectory` | Override pact file output location |
+| `@MockServerConfig` | Configure mock server host/port/protocol |
+
+### HTTP (REST API) Consumer Test
 
 ```java
-@Pact(provider="provider", consumer="consumer")
-public V4Pact createPact(PactDslWithProvider builder) {
-    return builder
-        .given("state-description") // In what state do we expect the system to be when this interation occurs
-        .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
-            .path("/api")
-            .method("GET")
-            .headers(Map.of("Accept", "application/json"))
-        .willRespondWith()
-            .headers(Map.of("Content-Type", "application/json"))
-            .status(200)
-            .body( /* graphql response body */ )
-        .toPact(V4Pact.class); // Needed for PactV4.
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit5.PactConsumerTest;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
+import au.com.dius.pact.core.model.PactSpecVersion;
+import au.com.dius.pact.core.model.V4Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
+@PactConsumerTest
+@PactTestFor(providerName = "{{PROVIDER_NAME}}", pactVersion = PactSpecVersion.V4)
+class HttpConsumerContractTest {
+
+    @Pact(provider = "{{PROVIDER_NAME}}", consumer = "{{CONSUMER_NAME}}")
+    public V4Pact createPact(PactDslWithProvider builder) {
+        return builder
+            .given("{{PROVIDER_STATE}}")
+            .uponReceiving("{{INTERACTION_DESCRIPTION}}")
+                .path("/api/users/123")
+                .method("GET")
+                .headers(Map.of("Accept", "application/json"))
+            .willRespondWith()
+                .headers(Map.of("Content-Type", "application/json"))
+                .status(200)
+                .body(new PactDslJsonBody()
+                    .uuid("id")
+                    .stringType("name", "John Doe")
+                    .numberType("age", 30))
+            .toPact(V4Pact.class);
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "createPact")
+    void testGetUser(MockServer mockServer) {
+        var response = httpClient.get(mockServer.getUrl() + "/api/users/123");
+        assertThat(response.statusCode()).isEqualTo(200);
+    }
 }
 ```
 
-## Example: Pact HTTP (GraphQL) based interaction consumer test
-
-This is an example of a Consumer Test for a GraphQL call using PactV4 and JUnit 5.
+### HTTP (GraphQL) Consumer Test
 
 ```java
-@Pact(provider="provider", consumer="consumer")
-public V4Pact createPact(PactDslWithProvider builder) {
+@Pact(provider = "{{PROVIDER_NAME}}", consumer = "{{CONSUMER_NAME}}")
+public V4Pact createGraphQLPact(PactDslWithProvider builder) {
     return builder
-        .given("state-description") // In what state do we expect the system to be when this interation occurs
-        .uponReceiving("Interaction description") // Short functional description of the HTTP based interaction (e.g. retrieving customer orders)
+        .given("{{PROVIDER_STATE}}")
+        .uponReceiving("GraphQL query for user")
             .path("/graphql")
             .method("POST")
-            .headers(Map.of("Accept", "application/json"))
+            .headers(Map.of("Accept", "application/json", "Content-Type", "application/json"))
+            .body(new PactDslJsonBody()
+                .stringType("query", "query GetUser($id: ID!) { user(id: $id) { id name } }")
+                .object("variables")
+                    .stringType("id", "123")
+                    .closeObject())
         .willRespondWith()
             .headers(Map.of("Content-Type", "application/json"))
             .status(200)
-            .body(
-                new PactDslJsonBody()
-                    .uuid("id", UUID.randomUUID().toString())
-                    .stringType("field", "value")
-                    .localDate("date", "DD-MM-YYYY", LocalDate.now())
-            )
-        .toPact(V4Pact.class); // Needed for PactV4.
+            .body(new PactDslJsonBody()
+                .object("data")
+                    .object("user")
+                        .uuid("id")
+                        .stringType("name", "John")
+                    .closeObject()
+                .closeObject())
+        .toPact(V4Pact.class);
 }
 ```
 
-## Example: Pact Message based interaction consumer test
-
-This is an example of a Consumer Test using PactV4 and JUnit 5.
+### Message Consumer Test
 
 For message based interactions, the consumer is the party receiving a message.
 
@@ -126,64 +226,297 @@ For message based interactions, the consumer is the party receiving a message.
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.junit5.PactConsumerTest;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
+import au.com.dius.pact.consumer.junit5.ProviderType;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.groovy.util.Maps;
+import au.com.dius.pact.core.model.messaging.Message;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 
 @PactConsumerTest
+@PactTestFor(providerName = "{{PROVIDER_NAME}}", providerType = ProviderType.ASYNCH)
 public class MessageConsumerContractTest {
 
-    /**
-     * A Pact defines the contract between the consumer and producer.
-     */
-    @Pact(consumer = "consumer", provider = "provider")
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Pact(consumer = "{{CONSUMER_NAME}}", provider = "{{PROVIDER_NAME}}")
     public V4Pact messagePact(MessagePactBuilder builder) {
         return builder
-            .hasPactWith("provider")
-            .expectsToReceive("message-description")
+            .hasPactWith("{{PROVIDER_NAME}}")
+            .expectsToReceive("{{MESSAGE_DESCRIPTION}}")
             .withContent(new PactDslJsonBody()
-                .uuid("id", UUID.randomUUID().toString())
+                .uuid("id")
                 .stringType("name", "example")
-                .localDate("date", "DD-MM-YYYY", LocalDate.now())
-            )
-            .withMetadata(Maps.of("kafka-topic", FPH_BUSINESS_EVENT_PROCESSOR_TOPIC))
+                .localDate("date", "dd-MM-yyyy", LocalDate.now()))
+            .withMetadata(Map.of("kafka-topic", "{{TOPIC_NAME}}"))
             .toPact(V4Pact.class);
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "messagePact")
+    void testOrderCreatedEvent(List<Message> messages) throws Exception {
+        assertThat(messages).hasSize(1);
+        var message = messages.get(0);
+        var order = objectMapper.readValue(message.contentsAsString(), Order.class);
+        assertThat(order.getName()).isNotBlank();
     }
 }
 ```
 
-# Pact Provider Verification Test examples
-
-## Example: Pact Message based interaction provider test
-
-This is an example of a Provider Verification Test using PactV4, Spring Boot and JUnit 5.
+### Multiple Interactions Per Pact
 
 ```java
-import au.com.dius.pact.provider.MessageAndMetadata;
-import au.com.dius.pact.provider.PactVerifyProvider;
-import au.com.dius.pact.provider.junit5.MessageTestTarget;
+@Pact(provider = "{{PROVIDER_NAME}}", consumer = "{{CONSUMER_NAME}}")
+public V4Pact multipleInteractions(PactDslWithProvider builder) {
+    return builder
+        .given("users exist")
+        .uponReceiving("get all users")
+            .path("/users")
+            .method("GET")
+        .willRespondWith()
+            .status(200)
+            .body(/* response body */)
+
+        .given("user 123 exists")
+        .uponReceiving("get user by id")
+            .path("/users/123")
+            .method("GET")
+        .willRespondWith()
+            .status(200)
+            .body(/* response body */)
+
+        .toPact(V4Pact.class);
+}
+```
+
+### Error Response Testing
+
+```java
+@Pact(provider = "{{PROVIDER_NAME}}", consumer = "{{CONSUMER_NAME}}")
+public V4Pact notFoundPact(PactDslWithProvider builder) {
+    return builder
+        .given("user 999 does not exist")
+        .uponReceiving("get non-existent user")
+            .path("/users/999")
+            .method("GET")
+        .willRespondWith()
+            .status(404)
+            .body(new PactDslJsonBody()
+                .stringType("error", "User not found")
+                .stringType("code", "USER_NOT_FOUND"))
+        .toPact(V4Pact.class);
+}
+```
+
+## Matchers
+
+### Basic Matchers
+
+```java
+new PactDslJsonBody()
+    // Type matchers
+    .stringType("name", "example")
+    .numberType("count", 5)
+    .booleanType("active", true)
+
+    // Format matchers
+    .uuid("id")
+    .ipAddress("ip")
+    .timestamp("createdAt", "yyyy-MM-dd'T'HH:mm:ss")
+    .localDate("date", "dd-MM-yyyy", LocalDate.now())
+
+    // Regex matchers
+    .stringMatcher("email", "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$", "test@example.com")
+```
+
+### Array Matchers
+
+```java
+new PactDslJsonBody()
+    .eachLike("items")              // Array with at least 1 element
+        .stringType("name")
+        .closeArray()
+    .minArrayLike("tags", 1)        // Array with minimum 1 element
+        .stringType("value")
+        .closeArray()
+    .maxArrayLike("results", 10)    // Array with maximum 10 elements
+        .stringType("id")
+        .closeArray()
+    .minMaxArrayLike("data", 1, 5)  // Array with 1-5 elements
+        .numberType("value")
+        .closeArray()
+```
+
+### Nested Objects
+
+```java
+new PactDslJsonBody()
+    .object("address")
+        .stringType("street")
+        .stringType("city")
+        .closeObject()
+```
+
+### Query Parameters and Headers Matching
+
+```java
+.uponReceiving("search users")
+    .path("/users")
+    .method("GET")
+    .matchQuery("name", ".*", "John")
+    .matchQuery("limit", "\\d+", "10")
+    .matchHeader("Accept", "application/.*json", "application/json")
+    .matchHeader("X-Request-Id", "[a-f0-9-]+", "abc-123")
+```
+
+### Lambda DSL (Alternative Syntax)
+
+```java
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
+
+newJsonBody(body -> {
+    body.stringType("name", "example");
+    body.numberType("age", 25);
+    body.array("items", arr -> {
+        arr.object(item -> {
+            item.stringType("id");
+            item.stringType("name");
+        });
+    });
+}).build()
+```
+
+## Provider Verification Tests
+
+### JUnit 5 Annotations
+
+| Annotation | Purpose |
+|------------|---------|
+| `@Provider` | Specifies the provider name |
+| `@PactBroker` | Load pacts from Pact Broker |
+| `@PactFolder` | Load pacts from local folder |
+| `@State` | Provider state setup/teardown handler |
+| `@TestTemplate` | JUnit 5 template for pact verification |
+| `@PactVerifyProvider` | Links method to message interaction verification |
+| `@IgnoreNoPactsToVerify` | Don't fail if no pacts found |
+| `@VerificationReports` | Configure report formats (console, markdown, json) |
+
+### HTTP Provider Test (Plain JUnit 5)
+
+For plain JUnit 5 tests without Spring Boot, start your HTTP server manually:
+
+```java
+import au.com.dius.pact.provider.junit5.HttpTestTarget;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
+import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
 import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+@Provider("{{PROVIDER_NAME}}")
+@PactFolder("pacts")
+class HttpProviderContractTest {
+
+    private static final int PORT = 8080;
+
+    @BeforeAll
+    static void startServer() {
+        // Start your application server on PORT
+    }
+
+    @AfterAll
+    static void stopServer() {
+        // Stop your application server
+    }
+
+    @TestTemplate
+    @ExtendWith(PactVerificationInvocationContextProvider.class)
+    void pactVerificationTestTemplate(PactVerificationContext context) {
+        context.verifyInteraction();
+    }
+
+    @BeforeEach
+    void before(PactVerificationContext context) {
+        context.setTarget(new HttpTestTarget("localhost", PORT));
+    }
+
+    @State("{{PROVIDER_STATE}}")
+    void setupState() {
+        // Set up test data for this state
+    }
+}
+```
+
+### HTTP Provider Test (Spring Boot)
+
+```java
+import au.com.dius.pact.provider.junit5.HttpTestTarget;
+import au.com.dius.pact.provider.junit5.PactVerificationContext;
+import au.com.dius.pact.provider.spring.junit5.PactVerificationSpring6Provider;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
-import au.com.dius.pact.provider.spring.spring6.PactVerificationSpring6Provider;
-import org.apache.groovy.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.web.server.LocalServerPort;
+
+@Provider("{{PROVIDER_NAME}}")
+@PactBroker  // or @PactFolder("pacts")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class HttpProviderContractTest {
+
+    @LocalServerPort
+    private int port;
+
+    @TestTemplate
+    @ExtendWith(PactVerificationSpring6Provider.class)  // Use Spring6 for Spring Boot 3.x
+    void pactVerificationTestTemplate(PactVerificationContext context) {
+        context.verifyInteraction();
+    }
+
+    @BeforeEach
+    void before(PactVerificationContext context) {
+        context.setTarget(new HttpTestTarget("localhost", port));
+    }
+
+    @State("{{PROVIDER_STATE}}")
+    void setupState() {
+        // Set up test data for this state
+    }
+}
+```
+
+### Message Provider Test
+
+```java
+import au.com.dius.pact.provider.MessageAndMetadata;
+import au.com.dius.pact.provider.junit5.MessageTestTarget;
+import au.com.dius.pact.provider.junit5.PactVerificationContext;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import au.com.dius.pact.provider.spring.junit5.PactVerificationSpring6Provider;
+import au.com.dius.pact.provider.PactVerifyProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
-import java.util.UUID;
 
-@Provider("provider")
+@Provider("{{PROVIDER_NAME}}")
+@PactFolder("pacts")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-class ProviderContractTest {
+class MessageProviderContractTest {
 
     @TestTemplate
     @ExtendWith(PactVerificationSpring6Provider.class)
@@ -196,35 +529,161 @@ class ProviderContractTest {
         context.setTarget(new MessageTestTarget());
     }
 
-    /**
-     * Verify the message interaction with description `message description`. 
-     */
-    @PactVerifyProvider("message-description")
+    @PactVerifyProvider("{{MESSAGE_DESCRIPTION}}")
     public MessageAndMetadata verifyMessageInteraction() {
-        // Below an example message is constructed, in a real application the code is invoked that constructs the message that needs to be verified against the consumer contract.
-        var message = """ 
+        var message = """
             {
-              "name": "value",
-              ...other fields here...
+              "id": "123",
+              "name": "value"
             }
             """;
-        Map<String, String> metadata = Maps.of("topic", "kafka-topic");
+        Map<String, String> metadata = Map.of("kafka-topic", "{{TOPIC_NAME}}");
         return new MessageAndMetadata(message.getBytes(), metadata);
     }
 }
 ```
 
-# Exchanging Pact Files
-After a consumer generates a new Pact file, it must be shared with providers for verification. Two main approaches:
+### Provider State Handlers
 
-* Commit to provider repository – Create a PR with the changed interactions (manually or automated via the consumer build).
-* Provider fetches Pact files – Publish interactions to a third party (build server artifacts, S3, or Pact Broker) where providers download them before verification.
+Provider states link consumer expectations to test fixtures. The `.given()` string in the consumer must match the `@State` annotation exactly.
 
-Using the Pact Broker adds the benefit that providers can publish verification results, allowing both parties to query which versions are compatible and safe to deploy.
+**Consumer side:**
+```java
+@Pact(consumer = "{{CONSUMER_NAME}}", provider = "{{PROVIDER_NAME}}")
+public V4Pact createPact(PactDslWithProvider builder) {
+    return builder
+        .given("a user exists with id 123")  // Creates providerState in Pact
+        .uponReceiving("get user by id")
+        // ...
+}
+```
 
-## Sharing Pact files via a shared library jar (without a broker)
+**Provider side:**
+```java
+@State("a user exists with id 123")
+void userExists() {
+    userRepository.save(new User(123, "Test User"));
+}
 
-When sharing Pact files in a jar, use the following maven configuration for packaging the pacts into a jar during the maven package phase: 
+@State(value = "a user exists with id 123", action = StateChangeAction.TEARDOWN)
+void userExistsTeardown() {
+    userRepository.deleteAll();
+}
+```
+
+### Request Modifications for Verification
+
+Adding authentication headers during provider verification:
+
+```java
+@TestTemplate
+@ExtendWith(PactVerificationInvocationContextProvider.class)
+void verifyPact(PactVerificationContext context, HttpRequest request) {
+    request.addHeader("Authorization", "Bearer " + generateToken());
+    context.verifyInteraction();
+}
+```
+
+### Provider State Injection
+
+Inject dynamic values from provider state into requests:
+
+```java
+.pathFromProviderState("/users/${userId}", "/users/123")
+.headerFromProviderState("Authorization", "Bearer ${token}", "Bearer abc123")
+.queryParameterFromProviderState("id", "${userId}", "123")
+```
+
+## Pact Broker Integration
+
+### Loading Pacts from Broker
+
+```java
+@Provider("{{PROVIDER_NAME}}")
+@PactBroker(
+    url = "${PACT_BROKER_URL}",
+    authentication = @PactBrokerAuth(token = "${PACT_BROKER_TOKEN}")
+)
+class ProviderContractTest {
+    // ...
+}
+```
+
+### Consumer Version Selectors
+
+Select which pacts to verify from the broker:
+
+```java
+@PactBrokerConsumerVersionSelectors
+static SelectorBuilder consumerVersionSelectors() {
+    return new SelectorBuilder()
+        .mainBranch()           // Latest from main branch
+        .deployedTo("prod")     // Deployed to production
+        .matchingBranch();      // Same branch name as provider
+}
+```
+
+### Pending and WIP Pacts
+
+Prevents new pacts from breaking provider builds:
+
+```java
+@PactBroker(
+    enablePendingPacts = "true",
+    providerTags = "main",
+    includeWipPactsSince = "2024-01-01"
+)
+```
+
+### Publishing Verification Results
+
+System properties for publishing to the broker:
+
+```
+-Dpact.verifier.publishResults=true
+-Dpact.provider.version=${project.version}
+-Dpact.provider.branch=${git.branch}
+-Dpact.provider.tag=main,prod
+```
+
+### Maven Plugin for Publishing
+
+```xml
+<plugin>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>${pact.version}</version>
+    <configuration>
+        <pactBrokerUrl>${pact.broker.url}</pactBrokerUrl>
+        <pactBrokerToken>${pact.broker.token}</pactBrokerToken>
+    </configuration>
+</plugin>
+```
+
+### Can-I-Deploy
+
+Check deployment safety before deploying:
+
+```bash
+pact-broker can-i-deploy \
+    --pacticipant {{CONSUMER_NAME}} \
+    --version 1.0.0 \
+    --to-environment production
+
+# Maven integration
+mvn pact:can-i-deploy \
+    -Dpacticipant={{CONSUMER_NAME}} \
+    -Dpact.version=1.0.0 \
+    -Dto=production
+```
+
+## Exchanging Pact Files (Without Broker)
+
+**Options:**
+* **Commit to provider repository** - Create a PR with the changed interactions
+* **Provider fetches Pact files** - Publish to build server artifacts, S3, etc.
+
+### Sharing via JAR
 
 ```xml
 <plugin>
@@ -248,37 +707,112 @@ When sharing Pact files in a jar, use the following maven configuration for pack
 </plugin>
 ```
 
-# Pact workflow
+## Kotlin Examples
 
-## Key concepts
+### Consumer Test
 
-| Concept | Description |
-|---------|-------------|
-| **Consumer** | Application that uses functionality from another component (e.g., makes HTTP requests) |
-| **Provider** | Application that offers functionality to others (e.g., exposes an HTTP API) |
-| **Interaction** | Defines what is consumed and how: request, provider state, and expected response |
-| **Provider state** | Test fixture describing the provider's state during an interaction |
-| **Contract (Pact file)** | Contains all interactions between a specific consumer and provider |
-| **Verification** | Replays interactions against provider code and compares actual vs expected responses |
+```kotlin
+@PactConsumerTest
+@PactTestFor(providerName = "{{PROVIDER_NAME}}", pactVersion = PactSpecVersion.V4)
+class HttpConsumerContractTest {
 
-An application can be both consumer and provider depending on the interaction.
+    @Pact(consumer = "{{CONSUMER_NAME}}", provider = "{{PROVIDER_NAME}}")
+    fun createPact(builder: PactDslWithProvider): V4Pact {
+        return builder
+            .given("{{PROVIDER_STATE}}")
+            .uponReceiving("{{INTERACTION_DESCRIPTION}}")
+                .path("/api/users/123")
+                .method("GET")
+            .willRespondWith()
+                .status(200)
+                .body(PactDslJsonBody()
+                    .stringType("name", "John")
+                    .numberType("age", 30))
+            .toPact(V4Pact::class.java)
+    }
 
-## Consumer workflow
+    @Test
+    @PactTestFor(pactMethod = "createPact")
+    fun testGetUser(mockServer: MockServer) {
+        val response = httpClient.get("${mockServer.getUrl()}/api/users/123")
+        assertThat(response.statusCode()).isEqualTo(200)
+    }
+}
+```
 
-1. Write consumer tests that specify the interactions you need
-2. Consumer tests generate the Pact file automatically
-3. Share the Pact file with the provider for verification
+### Provider Test (Spring Boot)
 
-## Provider workflow
+```kotlin
+@Provider("{{PROVIDER_NAME}}")
+@PactFolder("pacts")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class HttpProviderContractTest {
 
-1. Verify all existing contracts against your provider code
-2. If verification passes, your changes are compatible with all consumers
+    @LocalServerPort
+    private var port: Int = 0
 
-# References to resources:
+    @TestTemplate
+    @ExtendWith(PactVerificationSpring6Provider::class)
+    fun pactVerificationTestTemplate(context: PactVerificationContext) {
+        context.verifyInteraction()
+    }
 
-* Pact JVM provider: https://docs.pact.io/implementation_guides/jvm/provider/junit5
-* Pact consumer driven contract testing: https://www.codecentric.de/en/knowledge-hub/blog/consumer-driven-contract-testing-with-pact
-* Pact consumer test for Kafka example: https://github.com/pactflow/example-consumer-java-kafka/blob/master/src/test/java/io/pactflow/example/kafka/ProductsPactTest.java
-* Pact tests for Kafka: https://docs.pact.io/recipes/kafka
-* Pact in event driven applications: https://www.codecentric.de/en/knowledge-hub/blog/message-pact-contract-testing-in-event-driven-applications
+    @BeforeEach
+    fun before(context: PactVerificationContext) {
+        context.setTarget(HttpTestTarget("localhost", port))
+    }
 
+    @State("{{PROVIDER_STATE}}")
+    fun setupState() {
+        userRepository.save(User(123, "Test User"))
+    }
+}
+```
+
+## Common Mistakes
+
+| Mistake | Problem | Fix |
+|---------|---------|-----|
+| Using exact values instead of matchers | Brittle tests that break on any value change | Use `stringType()`, `numberType()` etc. |
+| Forgetting `.toPact(V4Pact.class)` | Compilation error or wrong pact version | Always end builder chain with `.toPact(V4Pact.class)` |
+| Mismatched provider state strings | Provider can't find state handler | Copy exact string from consumer `.given()` to provider `@State` |
+| Missing `@PactConsumerTest` | Mock server not started | Add annotation to test class |
+| Wrong `@ExtendWith` provider class | Spring context issues | Use `PactVerificationSpring6Provider` for Spring Boot 3.x |
+| Not closing objects/arrays | Malformed JSON structure | Match every `.object()` with `.closeObject()`, `.eachLike()` with `.closeArray()` |
+
+## Troubleshooting
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| "No pact files found" | Wrong `@PactFolder` path | Check `target/pacts` exists after running consumer tests |
+| "No matching interaction found" | Request doesn't match pact definition | Verify path, method, headers match exactly |
+| "Provider state not found" | Missing `@State` method | Add `@State("exact string")` method to provider test |
+| "Connection refused" | Provider not running | Ensure `@BeforeAll` starts server, check port matches |
+| Mock server returns 500 | Test method threw exception | Check test logic, ensure client uses `mockServer.getUrl()` |
+
+## Quick Reference
+
+**Consumer Test Setup:**
+```
+@PactConsumerTest + @PactTestFor + @Pact + @Test
+```
+
+**Provider HTTP Test Setup:**
+```
+@Provider + @PactFolder/@PactBroker + @TestTemplate + @ExtendWith + HttpTestTarget
+```
+
+**Provider Message Test Setup:**
+```
+@Provider + @PactFolder/@PactBroker + @TestTemplate + @ExtendWith + MessageTestTarget + @PactVerifyProvider
+```
+
+**Pact File Location:**
+Consumer tests generate pact files to `target/pacts/` by default. Override with `@PactDirectory`.
+
+**Common System Properties:**
+```
+-Dpact.verifier.publishResults=true      # Publish results to broker
+-Dpact.provider.version=${version}       # Provider version for broker
+-Dpact.rootDir=target/pacts              # Change pact output directory
+```

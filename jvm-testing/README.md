@@ -10,7 +10,9 @@ Expert skill for writing Pact contract tests for HTTP (REST/GraphQL) and Message
 
 **Use this skill for:**
 - Creating HTTP-based interaction contract tests (REST APIs, GraphQL)
-- Creating Message-based interaction contract tests (Kafka)
+- Creating Message-based interaction contract tests (Kafka, RabbitMQ)
+- Writing consumer tests (define expectations for services you call)
+- Writing provider verification tests (verify your service meets consumer expectations)
 - Reviewing existing Pact tests for best practices
 
 **Example:**
@@ -19,11 +21,14 @@ Use the pact-contract-test skill to create a consumer test for my REST API
 ```
 
 The skill provides:
-- PactV4 examples for JUnit 5
+- Decision flow for choosing the right test type
+- Quick start templates with placeholder markers
+- Pact V4 examples for JUnit 5 (Java and Kotlin)
 - Consumer and provider test templates
 - Maven dependency configuration
-- Spring Boot integration examples
-- Pact file sharing via JAR packaging
+- Spring Boot 2.x and 3.x integration
+- Pact Broker integration and can-i-deploy checks
+- Common mistakes and troubleshooting guides
 
 ## Installation
 
