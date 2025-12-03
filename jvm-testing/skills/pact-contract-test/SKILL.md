@@ -1,7 +1,7 @@
 ---
 name: pact-contract-test
 description: Pact contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
-allowed-tools: Read, WebFetch
+allowed-tools: Read, WebFetch, WebSearch
 ---
 
 # Pact Contract Test Skill
@@ -12,6 +12,8 @@ Before continuing, first ask for the following input:
 1. What is the interaction type: HTTP or Message based interaction?
 2. Is this a Consumer test or Provider verification test?
 3. Provide an example interaction: request/response for HTTP or a message for Message (asynchronous) interactions.
+
+> **Kotlin:** Examples use Java syntax. Kotlin is nearly identical—use `fun` for methods, `val`/`var` for variables, and `::class.java` for class references.
 
 ## Decision Flow
 
@@ -42,6 +44,49 @@ Before continuing, first ask for the following input:
 | **Verification** | Replays interactions against provider code and compares actual vs expected responses |
 
 An application can be both consumer and provider depending on the interaction.
+
+## Maven Dependencies
+
+Where `${pact.version}` is a variable for the pact version (e.g. 4.6.17).
+
+### Consumer Test (Required)
+
+```xml
+<dependency>
+    <groupId>au.com.dius.pact.consumer</groupId>
+    <artifactId>junit5</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+### Provider Verification (Add based on framework)
+
+```xml
+<!-- Spring Boot 3.x (Spring 6) -->
+<dependency>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>spring6</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- Spring Boot 2.x -->
+<dependency>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>junit5spring</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- Plain JUnit 5 (no Spring) -->
+<dependency>
+    <groupId>au.com.dius.pact</groupId>
+    <artifactId>provider</artifactId>
+    <version>${pact.version}</version>
+    <scope>test</scope>
+</dependency>
+```
 
 ## Quick Start Template (HTTP Consumer)
 
@@ -85,49 +130,6 @@ class {{CONSUMER_NAME}}ContractTest {
         // Use mockServer.getUrl() + path to call the mock
     }
 }
-```
-
-## Maven Dependencies
-
-Where `${pact.version}` is a variable for the pact version (e.g. 4.6.17).
-
-### Core Dependencies (Required)
-
-```xml
-<dependency>
-    <groupId>au.com.dius.pact.consumer</groupId>
-    <artifactId>junit5</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
-```
-
-### Provider Verification (Add based on framework)
-
-```xml
-<!-- Spring Boot 3.x (Spring 6) -->
-<dependency>
-    <groupId>au.com.dius.pact.provider</groupId>
-    <artifactId>spring6</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
-
-<!-- Spring Boot 2.x -->
-<dependency>
-    <groupId>au.com.dius.pact.provider</groupId>
-    <artifactId>junit5spring</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
-
-<!-- Plain JUnit 5 (no Spring) -->
-<dependency>
-    <groupId>au.com.dius.pact</groupId>
-    <artifactId>provider</artifactId>
-    <version>${pact.version}</version>
-    <scope>test</scope>
-</dependency>
 ```
 
 ## Consumer Tests
@@ -313,9 +315,9 @@ public V4Pact notFoundPact(PactDslWithProvider builder) {
 }
 ```
 
-## Matchers
+### Matchers
 
-### Basic Matchers
+#### Basic Matchers
 
 ```java
 new PactDslJsonBody()
@@ -334,7 +336,7 @@ new PactDslJsonBody()
     .stringMatcher("email", "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$", "test@example.com")
 ```
 
-### Array Matchers
+#### Array Matchers
 
 ```java
 new PactDslJsonBody()
@@ -352,7 +354,7 @@ new PactDslJsonBody()
         .closeArray()
 ```
 
-### Nested Objects
+#### Nested Objects
 
 ```java
 new PactDslJsonBody()
@@ -362,7 +364,7 @@ new PactDslJsonBody()
         .closeObject()
 ```
 
-### Query Parameters and Headers Matching
+#### Query Parameters and Headers Matching
 
 ```java
 .uponReceiving("search users")
@@ -374,7 +376,7 @@ new PactDslJsonBody()
     .matchHeader("X-Request-Id", "[a-f0-9-]+", "abc-123")
 ```
 
-### Lambda DSL (Alternative Syntax)
+#### Lambda DSL (Alternative Syntax)
 
 ```java
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
@@ -389,6 +391,79 @@ newJsonBody(body -> {
         });
     });
 }).build()
+```
+
+## Pact Stub Server
+
+Run Pact contract files as a mock HTTP server for testing consumers against provider stubs during development.
+
+### Quick Start (Docker)
+
+```bash
+docker run -d --name pact-stub \
+  -p 8081:8080 \
+  -v "$(pwd)/target/pacts:/pacts" \
+  pactfoundation/pact-stub-server \
+  -f /pacts/consumer-provider.json \
+  -p 8080
+```
+
+### Essential CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `-f, --file <file>` | Pact file to load (repeatable) |
+| `-d, --dir <dir>` | Directory of pact files to load |
+| `-p, --port <port>` | Port to run on |
+| `-w, --watch` | Watch for changes and reload |
+| `-o, --cors` | Enable CORS headers |
+| `-l, --loglevel <level>` | Log level: error, warn, info, debug, trace |
+
+### Pact Broker Options
+
+| Option | Description |
+|--------|-------------|
+| `-b, --broker-url <url>` | URL of the Pact Broker |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--provider-name <name>` | Filter pacts by provider name |
+
+### Docker Commands
+
+```bash
+docker logs pact-stub      # View logs
+docker stop pact-stub      # Stop server
+docker rm -f pact-stub     # Remove container
+```
+
+### Load from Pact Broker
+
+```bash
+docker run -d --name pact-stub \
+  -p 8081:8080 \
+  pactfoundation/pact-stub-server \
+  -b https://your-broker.pactflow.io \
+  -t your-api-token \
+  --provider-name customer-service \
+  -p 8080
+```
+
+### Docker Compose
+
+```yaml
+services:
+  pact-stub:
+    image: pactfoundation/pact-stub-server
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./target/pacts:/pacts
+    command: ["-d", "/pacts", "-p", "8080"]
+```
+
+### Testing the Stub
+
+```bash
+curl http://localhost:8081/customers/1234
 ```
 
 ## Provider Verification Tests
@@ -755,68 +830,6 @@ mvn pact:can-i-deploy \
         </execution>
     </executions>
 </plugin>
-```
-
-## Kotlin Examples
-
-### Consumer Test
-
-```kotlin
-@PactConsumerTest
-@PactTestFor(providerName = "{{PROVIDER_NAME}}", pactVersion = PactSpecVersion.V4)
-class HttpConsumerContractTest {
-
-    @Pact(consumer = "{{CONSUMER_NAME}}", provider = "{{PROVIDER_NAME}}")
-    fun createPact(builder: PactDslWithProvider): V4Pact {
-        return builder
-            .given("{{PROVIDER_STATE}}")
-            .uponReceiving("{{INTERACTION_DESCRIPTION}}")
-                .path("/api/users/123")
-                .method("GET")
-            .willRespondWith()
-                .status(200)
-                .body(PactDslJsonBody()
-                    .stringType("name", "John")
-                    .numberType("age", 30))
-            .toPact(V4Pact::class.java)
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "createPact")
-    fun testGetUser(mockServer: MockServer) {
-        val response = httpClient.get("${mockServer.getUrl()}/api/users/123")
-        assertThat(response.statusCode()).isEqualTo(200)
-    }
-}
-```
-
-### Provider Test (Spring Boot)
-
-```kotlin
-@Provider("{{PROVIDER_NAME}}")
-@PactFolder("pacts")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class HttpProviderContractTest {
-
-    @LocalServerPort
-    private var port: Int = 0
-
-    @TestTemplate
-    @ExtendWith(PactVerificationSpring6Provider::class)
-    fun pactVerificationTestTemplate(context: PactVerificationContext) {
-        context.verifyInteraction()
-    }
-
-    @BeforeEach
-    fun before(context: PactVerificationContext) {
-        context.setTarget(HttpTestTarget("localhost", port))
-    }
-
-    @State("{{PROVIDER_STATE}}")
-    fun setupState() {
-        userRepository.save(User(123, "Test User"))
-    }
-}
 ```
 
 ## Common Mistakes
