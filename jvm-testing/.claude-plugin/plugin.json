@@ -1,7 +1,7 @@
 {
   "name": "jvm-testing",
   "description": "Helps building and setting up tests for JVM based applications.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "Stephan Oudmaijer"
   },
