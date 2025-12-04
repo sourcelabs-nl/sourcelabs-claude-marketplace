@@ -1,6 +1,7 @@
 ---
 description: Create a conventional commit with staged and modified files
 argument-hint: "[optional scope]"
+allowed-tools: Read, Bash
 ---
 
 You are tasked with creating a git commit following the Conventional Commits specification (https://www.conventionalcommits.org/en/v1.0.0/).
