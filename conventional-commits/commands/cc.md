@@ -13,9 +13,11 @@ IMPORTANT RULES:
 
 ## Step 1: Analyze Changes
 First, run these commands to understand the current state:
-!git status
-!git diff --cached
-!git diff
+```shell
+git status
+git diff --cached
+git diff
+```
 
 ## Step 2: Determine Commit Type
 Based on the changes, select the appropriate type:
