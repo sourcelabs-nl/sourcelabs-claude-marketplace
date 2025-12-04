@@ -1,6 +1,6 @@
 ---
 name: pact-contract-test
-description: Pact contract test expert that helps creating Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications.
+description: Create and modify Pact tests for HTTP (REST and GraphQL) and Message (asynchronous) based interactions in Java or Kotlin applications. Run pact files as stubs using the pact stub runner. Package pact files as a shared library (jar) using maven.
 allowed-tools: Read, WebFetch, WebSearch
 ---
 
@@ -12,6 +12,7 @@ Before continuing, first ask for the following input:
 1. What is the interaction type: HTTP or Message based interaction?
 2. Is this a Consumer test or Provider verification test?
 3. Provide an example interaction: request/response for HTTP or a message for Message (asynchronous) interactions.
+4. How to share the pact files, using a shared library (jar) or a Pact broker?
 
 > **Kotlin:** Examples use Java syntax. Kotlin is nearly identical—use `fun` for methods, `val`/`var` for variables, and `::class.java` for class references.
 
@@ -30,6 +31,12 @@ Before continuing, first ask for the following input:
    ├─ Spring Boot 3.x → use spring6 artifact
    ├─ Spring Boot 2.x → use junit5spring artifact
    └─ Plain JUnit 5 → use core artifacts only
+
+4. Sharing?
+   ├─ Broker → use Pact broker configuration
+   ├─ Shared library → use maven packaging configuration
+   
+   
 ```
 
 ## Key Concepts
@@ -53,6 +60,41 @@ Always add the `${pact.version}` to the maven properties section, this is the va
 <properties>
     <pact.version>4.6.17</pact.version>
 </properties>
+```
+
+### Pact do not track
+
+Always add `<pact_do_not_track>true</pact_do_not_track>` as an environment variable to `maven-surefire-plugin` to disable tracking.
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <environmentVariables>
+            <pact_do_not_track>true</pact_do_not_track> <!--- disables pact metrics upload -->
+        </environmentVariables>
+        ...
+    </configuration>
+</plugin>
+```
+
+### Pact broker configuration
+
+When using the pact broker, this section helps setting up the pact broker configuration.
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        ...
+        <systemProperties>
+            <pactbroker.url>${pactbroker.url}</pactbroker.url>
+            <pactbroker.token>${pactbroker.token}</pactbroker.token>
+        </systemProperties>
+    </configuration>
+</plugin>
 ```
 
 ### Consumer Test (Required)
