@@ -47,9 +47,17 @@ An application can be both consumer and provider depending on the interaction.
 
 ## Maven Dependencies
 
-Where `${pact.version}` is a variable for the pact version (e.g. 4.6.17).
+Always add the `${pact.version}` to the maven properties section, this is the variable for the pact version (e.g. 4.6.17).
+
+```xml
+<properties>
+    <pact.version>4.6.17</pact.version>
+</properties>
+```
 
 ### Consumer Test (Required)
+
+Always use the `${pact.version}` variable, do not inline the version!
 
 ```xml
 <dependency>
