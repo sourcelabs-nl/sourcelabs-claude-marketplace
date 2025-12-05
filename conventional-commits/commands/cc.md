@@ -45,7 +45,7 @@ The description should:
 - Not end with a period
 - Be concise (50 characters or less for the first line)
 
-If there are breaking changes, add `!` after the scope: `<type>(<scope>)!: <description>`
+For breaking changes, use this format: `<type>(<scope>)!: <description>`
 
 ## Step 5: Add Body (if needed)
 For complex changes, add a blank line and then a more detailed explanation.
